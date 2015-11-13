@@ -17,5 +17,5 @@ before_script:
     - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction
 
 script:
-    - bin/phpcs --standard=PSR2 src test
+    - bin/phpcs --standard=PSR2 src
 
