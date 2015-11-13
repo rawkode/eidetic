@@ -1,0 +1,7 @@
+suites:
+    core:
+        spec_prefix: phpspec
+        namespace: Rawkode\Eidetic
+        psr4_prefix: Rawkode\Eidetic
+        src_path: src
+        spec_path: test

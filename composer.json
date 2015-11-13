@@ -1,0 +1,19 @@
+{
+  "name": "eidetic",
+  "description": "EventSourcing library for php",
+  "autoload": {
+    "psr-4": {
+      "Rawkode\\Eidetic\\": "src//"
+    }
+  },
+  "config": {
+    "bin-dir": "bin",
+    "vendor-dir": "var/vendor"
+  },
+  "require": {
+    "php": ">=5.4"
+  },
+  "require-dev": {
+    "phpspec/phpspec": "~2.1"
+  }
+}
