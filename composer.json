@@ -1,5 +1,5 @@
 {
-  "name": "eidetic",
+  "name": "rawkode/eidetic",
   "description": "EventSourcing library for php",
   "autoload": {
     "psr-4": {
