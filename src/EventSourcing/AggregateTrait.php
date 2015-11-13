@@ -14,13 +14,19 @@ use Rawkode\Eidetic\SharedKernel\IdentifierIsNullException;
  */
 trait AggregateTrait
 {
-    /** @var  string */
+    /**
+ * @var  string
+*/
     protected $identifier;
 
-    /** @var  int|null */
+    /**
+ * @var  int|null
+*/
     protected $serialNumber = 0;
 
-    /** @var array */
+    /**
+ * @var array
+*/
     protected $stagedEvents = [];
 
     /**
@@ -50,7 +56,9 @@ trait AggregateTrait
      */
     public function initialise(DomainEventStreamInterface $domainEventStream)
     {
-        /** @var DomainEventInterface $domainEvent */
+        /**
+ * @var DomainEventInterface $domainEvent
+*/
         foreach ($domainEventStream as $domainEvent) {
             $this->applyDomainEvent($domainEvent);
         }

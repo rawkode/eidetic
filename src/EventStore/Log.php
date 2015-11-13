@@ -9,23 +9,33 @@ use Rawkode\Eidetic\SharedKernel\DomainEventInterface;
  */
 final class Log
 {
-    /** @var  int|null */
+    /**
+ * @var  int|null
+*/
     protected $serialNumber = null;
 
-    /** @var  string */
+    /**
+ * @var  string
+*/
     protected $aggregateIdentifier;
 
-    /** @var  \DateTime */
+    /**
+ * @var  \DateTime
+*/
     protected $recordedAt;
 
-    /** @var  string */
+    /**
+ * @var  string
+*/
     protected $domainEventClass;
 
-    /** @var DomainEventInterface */
+    /**
+ * @var DomainEventInterface
+*/
     protected $domainEvent;
 
     /**
-     * @param string $aggregateIdentifier
+     * @param string               $aggregateIdentifier
      * @param DomainEventInterface $domainEvent
      *
      * @throws \Exception

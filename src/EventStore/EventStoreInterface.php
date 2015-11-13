@@ -18,7 +18,7 @@ interface EventStoreInterface
 
     /**
      * @param $aggregateIdentifier
-     * @param int $serialNumber
+     * @param int                  $serialNumber
      * @param DomainEventInterface $domainEvent
      * @return
      */

@@ -11,6 +11,7 @@ use Rawkode\Eidetic\SharedKernel\DomainEventStreamInterface;
 
 /**
  * Class InMemory
+ *
  * @package Rawkode\NineteenEightyFour\EventStore
  *
  * @todo There must be a better name for "isEventSequential"
@@ -18,10 +19,14 @@ use Rawkode\Eidetic\SharedKernel\DomainEventStreamInterface;
  */
 class EventStore implements EventStoreInterface
 {
-    /** @var  array */
+    /**
+ * @var  array
+*/
     private $transactionCopy;
 
-    /** @var  array */
+    /**
+ * @var  array
+*/
     private $events;
 
     /**
@@ -47,8 +52,8 @@ class EventStore implements EventStoreInterface
     }
 
     /**
-     * @param string $aggregateIdentifier
-     * @param int $serialNumber
+     * @param string                     $aggregateIdentifier
+     * @param int                        $serialNumber
      * @param DomainEventStreamInterface $domainEvents
      * @return int
      * @throws SerialNumberIntegrityException
@@ -63,8 +68,8 @@ class EventStore implements EventStoreInterface
     }
 
     /**
-     * @param string $aggregateIdentifier
-     * @param int $serialNumber
+     * @param string               $aggregateIdentifier
+     * @param int                  $serialNumber
      * @param DomainEventInterface $domainEvent
      * @return int
      * @throws SerialNumberIntegrityException

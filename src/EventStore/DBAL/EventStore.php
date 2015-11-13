@@ -13,7 +13,9 @@ use Rawkode\Eidetic\SharedKernel\DomainEventStreamInterface;
 
 class EventStore implements EventStoreInterface
 {
-    /** @var  Connection */
+    /**
+ * @var  Connection
+*/
     private $connection;
 
     /**
@@ -43,7 +45,7 @@ class EventStore implements EventStoreInterface
 
     /**
      * @param $aggregateIdentifier
-     * @param int $serialNumber
+     * @param int                  $serialNumber
      * @param DomainEventInterface $domainEvent
      * @return int
      * @throws AggregateDoesNotExistException
@@ -67,7 +69,8 @@ class EventStore implements EventStoreInterface
         //   - so new event serial number can be incremented
         ++$serialNumber;
 
-        $this->connection->insert('events',
+        $this->connection->insert(
+            'events',
             [
                 'serial_number' => $serialNumber,
                 'aggregate_identifier' => $aggregateIdentifier,

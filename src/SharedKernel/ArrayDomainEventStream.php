@@ -6,7 +6,9 @@ use ArrayIterator;
 
 final class ArrayDomainEventStream implements DomainEventStreamInterface
 {
-    /** @var array<DomainEventInterface> */
+    /**
+ * @var array<DomainEventInterface>
+*/
     private $events;
 
     /**

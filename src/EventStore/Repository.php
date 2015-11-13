@@ -1,12 +1,13 @@
 <?php
 namespace Rawkode\Eidetic\EventStore;
 
-
 use Rawkode\Eidetic\EventSourcing\AggregateInterface;
 
 class Repository implements RepositoryInterface
 {
-    /** @var  EventStoreInterface */
+    /**
+ * @var  EventStoreInterface
+*/
     private $eventStore;
 
     /**

@@ -1,7 +1,6 @@
 <?php
 namespace Rawkode\Eidetic\EventStore;
 
-
 use Rawkode\Eidetic\EventSourcing\AggregateInterface;
 
 interface RepositoryInterface
