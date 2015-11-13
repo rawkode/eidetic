@@ -1,6 +1,11 @@
 {
   "name": "rawkode/eidetic",
   "description": "EventSourcing library for php",
+  "license": "MIT",
+  "keywords": [
+    "CQRS",
+    "EventSourcing"
+  ],
   "autoload": {
     "psr-4": {
       "Rawkode\\Eidetic\\": "src//"
