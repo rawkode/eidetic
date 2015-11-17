@@ -11,6 +11,11 @@
       "Rawkode\\Eidetic\\": "src//"
     }
   },
+  "autoload-dev": {
+     "psr-4": {
+         "Rawkode\\Eidetic\\Stub\\": "test//stub//"
+     }
+  },
   "config": {
     "bin-dir": "bin",
     "vendor-dir": "var/vendor"
