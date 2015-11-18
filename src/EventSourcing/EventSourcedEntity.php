@@ -15,14 +15,14 @@ interface EventSourcedEntity
     public function version();
 
     /**
-     * Initialise without staging the events
+     * Initialise without staging the events.
      *
      * @param array $eventStream
      */
     public function initialise(array $eventStream);
 
     /**
-     * Return a list of staged events
+     * Return a list of staged events.
      *
      * @return array
      */

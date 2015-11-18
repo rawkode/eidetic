@@ -16,7 +16,7 @@ final class EventPublishingEventStore implements EventStore
     private $eventPublisher;
 
     /**
-     * @param EventStore $eventStore
+     * @param EventStore     $eventStore
      * @param EventPublisher $eventPublisher
      */
     public function __construct(EventStore $eventStore, EventPublisher $eventPublisher)
@@ -26,7 +26,7 @@ final class EventPublishingEventStore implements EventStore
     }
 
     /**
-     * @param  EventSourcedEntity $eventSourcedEntity
+     * @param EventSourcedEntity $eventSourcedEntity
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
@@ -38,7 +38,8 @@ final class EventPublishingEventStore implements EventStore
     }
 
     /**
-     * @param  string $identifier
+     * @param string $identifier
+     *
      * @return array
      */
     public function fetchEntityEvents($identifier)
@@ -47,7 +48,7 @@ final class EventPublishingEventStore implements EventStore
     }
 
     /**
-     * @param  array  $events
+     * @param array $events
      */
     private function publish(array $events)
     {

@@ -13,6 +13,7 @@ interface EventStore
 
     /**
      * @param string $entityIdentifier
+     *
      * @return array
      */
     public function fetchEntityEvents($entityIdentifier);

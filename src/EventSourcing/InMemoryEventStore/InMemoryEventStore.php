@@ -5,27 +5,26 @@ namespace Rawkode\Eidetic\EventSourcing\InMemoryEventStore;
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 use Rawkode\Eidetic\EventSourcing\EventStore\EntityDoesNotExistException;
 use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
-use Rawkode\Eidetic\EventSourcing\EventStore\OutOfSync;
 use Rawkode\Eidetic\EventSourcing\EventStore\EventStore;
-use Rawkode\Eidetic\EventSourcing\EventStore\EventStoreException;
 use Rawkode\Eidetic\EventSourcing\EventStore\VersionMismatchException;
-
 use Rawkode\Eidetic\EventSourcing\InvalidEventException;
 
 final class InMemoryEventStore implements EventStore
 {
     /** @var array */
-    private $events = [ ];
+    private $events = [];
 
-    /** @var boolean */
+    /** @var bool */
     private $transactionInProgress = false;
 
     /** @var array */
-    private $transactionBackup = [ ];
+    private $transactionBackup = [];
 
     /**
-     * @param  string $entityIdentifier
+     * @param string $entityIdentifier
+     *
      * @throws EntityDoesNotExist
+     *
      * @return array
      */
     public function fetchEntityEvents($entityIdentifier)
@@ -38,7 +37,8 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param  EventSourcedEntity $eventSourcedEntity
+     * @param EventSourcedEntity $eventSourcedEntity
+     *
      * @throws OutOfSyncException
      * @throws InvalidEventException
      */
@@ -54,15 +54,12 @@ final class InMemoryEventStore implements EventStore
             foreach ($eventSourcedEntity->stagedEvents() as $event) {
                 $this->storeEvent($eventSourcedEntity->identifier(), $event, ++$version);
             }
-
         } catch (TransactionAlreadyInProgressException $transactionAlreadyInProgressExeception) {
             throw $transactionAlreadyInProgressExeception;
-
         } catch (InvalidEventException $invalidEventException) {
             $this->abortTransaction();
 
             throw $invalidEventException;
-
         }
 
         $this->completeTransaction();
@@ -92,14 +89,15 @@ final class InMemoryEventStore implements EventStore
      */
     private function completeTransaction()
     {
-        $this->transactionBackup = [ ];
+        $this->transactionBackup = [];
         $this->transactionInProgress = false;
     }
 
     /**
-     * @param  string $entityIdentifier
+     * @param string $entityIdentifier
      * @param  $event
-     * @param  int $version
+     * @param int $version
+     *
      * @throws InvalidEventException
      */
     private function storeEvent($entityIdentifier, $event, $version)
@@ -110,7 +108,7 @@ final class InMemoryEventStore implements EventStore
             'date_time' => new \DateTime('now', new \DateTimeZone('UTC')),
             'version' => $version,
             'event_class' => get_class($event),
-            'event' => $event
+            'event' => $event,
         ];
     }
 
@@ -128,7 +126,7 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param  EventSourcedEntity $eventSourcedEntity
+     * @param EventSourcedEntity $eventSourcedEntity
      */
     private function verifyVersion(EventSourcedEntity $eventSourcedEntity)
     {
@@ -142,8 +140,10 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param  string $identifier
+     * @param string $identifier
+     *
      * @throws EntityDoesNotExist
+     *
      * @return int
      */
     private function entityVersion($identifier)
