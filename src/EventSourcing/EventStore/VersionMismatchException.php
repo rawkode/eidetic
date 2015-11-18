@@ -2,6 +2,6 @@
 
 namespace Rawkode\Eidetic\EventSourcing\EventStore;
 
-final class EntityDoesNotExist extends \Exception
+final class VersionMismatchException extends \Exception
 {
 }

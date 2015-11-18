@@ -89,7 +89,7 @@ trait EventSourcedEntityMixin
         $applyMethod = 'apply' . end($explode);
 
         if (!method_exists($this, $applyMethod)) {
-            throw new EventHandlerDoesNotExist("Couldn't find event handler for '{$applyMethod}'");
+            throw new EventHandlerDoesNotExistException("Couldn't find event handler for '{$applyMethod}'");
         }
 
         return $applyMethod;

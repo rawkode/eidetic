@@ -2,6 +2,6 @@
 
 namespace Rawkode\Eidetic\EventSourcing\EventStore;
 
-final class InvalidEvent extends \Exception
+final class EntityDoesNotExistException extends \Exception
 {
 }

@@ -1,3 +1,2 @@
-## 0.0.1 (2015-11-13)
+## 0.1.1
 Initial release (Need to begin somewhere!)
-

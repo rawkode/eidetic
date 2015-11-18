@@ -3,13 +3,15 @@
 [![Build Status](https://travis-ci.org/rawkode/eidetic.svg?branch=master)](https://travis-ci.org/rawkode/eidetic)
 [![Scrutinizer](https://scrutinizer-ci.com/g/rawkode/eidetic/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/rawkode/eidetic/)
 
-An EventSourcing / CQRS implementation
+A CQRS and EventSourcing library for php >= 5.4
 
-### Warning: Extremely early prototype
+**Package is not ready for anything, except dabbling with CQRS and EventSourcing methodologies. DO NOT USE for anything important**
+
+## Examples
+Coming soon
 
 ## Tests
 
 ~~~
 bin/phpspec run
 ~~~
-
