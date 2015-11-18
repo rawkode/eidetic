@@ -8,7 +8,7 @@ A CQRS and EventSourcing library for php >= 5.4
 **Package is not ready for anything, except dabbling with CQRS and EventSourcing methodologies. DO NOT USE for anything important**
 
 ## Examples
-Coming soon
+Look inside the `examples` directory
 
 ## Tests
 
