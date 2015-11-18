@@ -12,7 +12,7 @@ trait EventSourcedEntityMixin
     protected $identifier;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $version = 0;
 
@@ -79,14 +79,16 @@ trait EventSourcedEntityMixin
 
     /**
      * @param object $event
+     *
      * @return string
+     *
      * @throws EventHandlerDoesNotExist
      */
     private function findEventHandler($event)
     {
         $class = get_class($event);
         $explode = explode('\\', $class);
-        $applyMethod = 'apply' . end($explode);
+        $applyMethod = 'apply'.end($explode);
 
         if (!method_exists($this, $applyMethod)) {
             throw new EventHandlerDoesNotExistException("Couldn't find event handler for '{$applyMethod}'");
