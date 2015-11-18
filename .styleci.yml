@@ -1,15 +1,7 @@
 preset: psr2
-
-enabled:
-  - concat_with_spaces
-  - strict
-
-disabled:
-  - concat_without_spaces
-  - phpdoc_short_description
-
 finder:
   exclude:
     - "test"
   name:
     - "*.php"
+    
