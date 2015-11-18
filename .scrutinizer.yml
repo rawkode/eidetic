@@ -6,3 +6,12 @@ tools:
     php_pdepend: true
     php_analyzer: true
 
+
+build:
+    tests:
+        override:
+            -
+                command: 'bin/phpspec run'
+                coverage:
+                    file: 'coverage.xml'
+                    format: 'php-clover'
