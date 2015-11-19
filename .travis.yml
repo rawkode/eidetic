@@ -23,4 +23,4 @@ script:
     - bin/phpcs --standard=PSR2 src
 
 after_script:
-  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ] && [ "$TRAVIS_PHP_VERSION" != "7.0" ]; then php ocular.phar code-coverage:upload --format=php-clover var/build/logs/clover.xml; fi
+  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ] && [ "$TRAVIS_PHP_VERSION" != "7" ]; then php ocular.phar code-coverage:upload --format=php-clover var/build/logs/clover.xml; fi
