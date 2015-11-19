@@ -119,7 +119,7 @@ final class InMemoryEventStore implements EventStore
     {
         try {
             if (false === get_class($event)) {
-                throw new \InvalidEventException();
+                throw new InvalidEventException();
             }
         } catch (\Exception $exception) {
             throw new InvalidEventException();
