@@ -118,8 +118,9 @@ final class InMemoryEventStore implements EventStore
     private function verifyEventIsAClass($event)
     {
         try {
-            // Do we need to worry about E_WARNING not raising an exception depending on php.ini?
-            get_class($event);
+            if (false === get_class($event)) {
+                throw new \InvalidEventException();
+            }
         } catch (\Exception $exception) {
             throw new InvalidEventException();
         }
