@@ -12,17 +12,17 @@ use Rawkode\Eidetic\EventSourcing\InvalidEventException;
 final class InMemoryEventStore implements EventStore
 {
     /**
-     * @var array 
+     * @var array
      */
     private $events = [];
 
     /**
-     * @var bool 
+     * @var bool
      */
     private $transactionInProgress = false;
 
     /**
-     * @var array 
+     * @var array
      */
     private $transactionBackup = [];
 
@@ -102,7 +102,7 @@ final class InMemoryEventStore implements EventStore
     /**
      * @param string $entityIdentifier
      * @param  $event
-     * @param int    $version
+     * @param int $version
      *
      * @throws InvalidEventException
      */

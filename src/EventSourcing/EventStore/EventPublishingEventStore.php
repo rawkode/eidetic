@@ -10,12 +10,12 @@ use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 final class EventPublishingEventStore implements EventStore
 {
     /**
-     * @var EventStore 
+     * @var EventStore
      */
     private $eventStore;
 
     /**
-     * @var EventPublisher 
+     * @var EventPublisher
      */
     private $eventPublisher;
 
