@@ -1,7 +1,6 @@
-preset: psr2
+preset: recommended
 finder:
   exclude:
     - "test"
   name:
     - "*.php"
-    

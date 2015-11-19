@@ -4,20 +4,26 @@ namespace Rawkode\Eidetic\EventSourcing\InMemoryEventStore;
 
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 use Rawkode\Eidetic\EventSourcing\EventStore\EntityDoesNotExistException;
-use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventSourcing\EventStore\EventStore;
+use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventSourcing\EventStore\VersionMismatchException;
 use Rawkode\Eidetic\EventSourcing\InvalidEventException;
 
 final class InMemoryEventStore implements EventStore
 {
-    /** @var array */
+    /**
+     * @var array 
+     */
     private $events = [];
 
-    /** @var bool */
+    /**
+     * @var bool 
+     */
     private $transactionInProgress = false;
 
-    /** @var array */
+    /**
+     * @var array 
+     */
     private $transactionBackup = [];
 
     /**
@@ -96,7 +102,7 @@ final class InMemoryEventStore implements EventStore
     /**
      * @param string $entityIdentifier
      * @param  $event
-     * @param int $version
+     * @param int    $version
      *
      * @throws InvalidEventException
      */
@@ -105,15 +111,17 @@ final class InMemoryEventStore implements EventStore
         $this->verifyEventIsAClass($event);
 
         $this->events[$entityIdentifier]['events'][] = [
-            'date_time' => new \DateTime('now', new \DateTimeZone('UTC')),
-            'version' => $version,
+            'date_time'   => new \DateTime('now', new \DateTimeZone('UTC')),
+            'version'     => $version,
             'event_class' => get_class($event),
-            'event' => $event,
+            'event'       => $event,
         ];
     }
 
     /**
-     * @param $event
+     * @param object $event
+     *
+     * @throws InvalidArgumentException
      */
     private function verifyEventIsAClass($event)
     {
