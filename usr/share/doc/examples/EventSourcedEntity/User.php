@@ -8,26 +8,27 @@ final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
     private $username;
 
     /**
-     * Usually best to make this private and force construction through statics
+     * Usually best to make this private and force construction through statics.
      */
     private function __construct()
     {
     }
 
     /**
-     * @param  string $username
+     * @param string $username
+     *
      * @return User
      */
     public static function createWithUsername($username)
     {
-        $user = new User();
+        $user = new self();
         $user->applyEvent(new UserCreatedWithUsername($username));
 
         return $user;
     }
 
     /**
-     * @param  UserCreatedWithUsername $userCreatedWithUsername
+     * @param UserCreatedWithUsername $userCreatedWithUsername
      */
     private function applyUserCreatedWithUsername(UserCreatedWithUsername $userCreatedWithUsername)
     {
@@ -35,7 +36,8 @@ final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
     }
 
     /**
-     * Get this users username
+     * Get this users username.
+     *
      * @return string
      */
     public function username()
