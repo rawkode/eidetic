@@ -3,6 +3,7 @@
 namespace phpspec\Rawkode\Eidetic\EventSourcing\DBALEventStore;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PhpSpec\ObjectBehavior;
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
@@ -14,6 +15,7 @@ final class DBALEventStoreSpec extends ObjectBehavior
     private $tableName;
     private $eventSourcedEntity;
     private $eventSourcedEntityInvalidEvent;
+    private $storedEvents;
 
     public function let(Connection $dbalConnection, EventSourcedEntity $eventSourcedEntity, EventSourcedEntity $eventSourcedEntityInvalidEvent)
     {
@@ -31,6 +33,12 @@ final class DBALEventStoreSpec extends ObjectBehavior
         $this->eventSourcedEntityInvalidEvent->identifier()->willReturn('my-identifier-seed');
         $this->eventSourcedEntityInvalidEvent->version()->willReturn(0);
         $this->eventSourcedEntityInvalidEvent->stagedEvents()->willReturn([0]);
+
+        $this->storedEvents = [
+            [
+                'event' => base64_encode(serialize(new \stdClass())),
+            ],
+        ];
 
         $this->beConstructedWith($dbalConnection, $this->tableName);
     }
@@ -56,7 +64,7 @@ final class DBALEventStoreSpec extends ObjectBehavior
         $this->shouldThrow('Rawkode\Eidetic\EventSourcing\InvalidEventException')->during('save', [$this->eventSourcedEntityInvalidEvent]);
     }
 
-    public function it_can_fetch_an_entities_events(QueryBuilder $queryBuilder)
+    public function it_can_fetch_an_entities_events(QueryBuilder $queryBuilder, Statement $statement)
     {
         $this->dbalConnection->createQueryBuilder()->willReturn($queryBuilder);
         $this->dbalConnection->createQueryBuilder()->shouldBeCalled();
@@ -71,6 +79,10 @@ final class DBALEventStoreSpec extends ObjectBehavior
 
         $queryBuilder->execute()->shouldBeCalled();
 
-        $this->fetchEntityEvents('identifier');
+        $statement->fetchAll()->willReturn($this->storedEvents);
+
+        $queryBuilder->execute()->willReturn($statement);
+
+        $this->fetchEntityEvents('identifier')->shouldBeLike([new \stdClass()]);
     }
 }

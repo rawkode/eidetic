@@ -71,10 +71,13 @@ final class DBALEventStore implements EventStore
 
         $statement = $queryBuilder->execute();
 
-        // $events = [];
-        // while ($row = $statement->fetch()) {
-        //     $events[] = unserialize(base64_decode($row['event']));
-        // }
+        $events = [];
+
+        foreach ($statement->fetchAll() as $row) {
+            $events[] = unserialize(base64_decode($row['event']));
+        }
+
+        return $events;
     }
 
     /**
