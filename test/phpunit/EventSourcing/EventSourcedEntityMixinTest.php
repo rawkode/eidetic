@@ -38,8 +38,39 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
          $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEvent', $stagedEvents[0]);
          $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEventTwo', $stagedEvents[1]);
          $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEvent', $stagedEvents[2]);
+    }
 
-     }
+    /**
+     * @test
+     */
+    public function it_can_commit_events()
+    {
+        $this->assertCount(0, $this->stagedEvents());
+        $this->assertEquals(0, $this->version());
+
+        $this->applyEvent(new TestEvent());
+        $this->applyEvent(new TestEventTwo());
+        $this->applyEvent(new TestEvent());
+
+        $this->commit();
+
+        $this->assertEquals(3, $this->version());
+        $this->assertCount(0, $this->stagedEvents());
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_initialise_itself()
+    {
+        $this->initialise([
+            new TestEvent(),
+            new TestEventTwo()
+        ]);
+
+        $this->assertEquals(2, $this->version());
+        $this->assertCount(0, $this->stagedEvents());
+    }
 
     private function applyTestEvent()
     {
