@@ -10,13 +10,22 @@ use Rawkode\Eidetic\EventSourcing\InvalidEventException;
 final class DBALEventStore implements EventStore
 {
     /**
+     * @var string
+     */
+    private $tableName;
+
+    /**
      * @var Doctrine\DBAL\Connection
      */
     private $dbalConnection;
 
-    public function __construct(Connection $dbalConnection)
+    /**
+     * @param Connection $dbalConnection
+     */
+    public function __construct(Connection $dbalConnection, $tableName)
     {
         $this->dbalConnection = $dbalConnection;
+        $this->tableName = $tableName;
     }
 
     /**
@@ -52,6 +61,20 @@ final class DBALEventStore implements EventStore
      */
     public function fetchEntityEvents($entityIdentifier)
     {
+        $queryBuilder = $this->dbalConnection->createQueryBuilder();
+
+        $queryBuilder->select('event');
+        $queryBuilder->from($this->tableName);
+        $queryBuilder->where('entity_identifier', '=', ':entity_identifier');
+        $queryBuilder->orderBy('recorded_at', 'ASC');
+        $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
+
+        $statement = $queryBuilder->execute();
+
+        // $events = [];
+        // while ($row = $statement->fetch()) {
+        //     $events[] = unserialize(base64_decode($row['event']));
+        // }
     }
 
     /**

@@ -3,18 +3,22 @@
 namespace phpspec\Rawkode\Eidetic\EventSourcing\DBALEventStore;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use PhpSpec\ObjectBehavior;
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+use Prophecy\Argument;
 
 final class DBALEventStoreSpec extends ObjectBehavior
 {
     private $dbalConnection;
+    private $tableName;
     private $eventSourcedEntity;
     private $eventSourcedEntityInvalidEvent;
 
     public function let(Connection $dbalConnection, EventSourcedEntity $eventSourcedEntity, EventSourcedEntity $eventSourcedEntityInvalidEvent)
     {
         $this->dbalConnection = $dbalConnection;
+        $this->tableName = 'events';
 
         $this->eventSourcedEntity = $eventSourcedEntity;
 
@@ -28,7 +32,7 @@ final class DBALEventStoreSpec extends ObjectBehavior
         $this->eventSourcedEntityInvalidEvent->version()->willReturn(0);
         $this->eventSourcedEntityInvalidEvent->stagedEvents()->willReturn([0]);
 
-        $this->beConstructedWith($dbalConnection);
+        $this->beConstructedWith($dbalConnection, $this->tableName);
     }
 
     public function it_implements_event_store()
@@ -50,5 +54,23 @@ final class DBALEventStoreSpec extends ObjectBehavior
         $this->dbalConnection->rollBack()->shouldBeCalled();
 
         $this->shouldThrow('Rawkode\Eidetic\EventSourcing\InvalidEventException')->during('save', [$this->eventSourcedEntityInvalidEvent]);
+    }
+
+    public function it_can_fetch_an_entities_events(QueryBuilder $queryBuilder)
+    {
+        $this->dbalConnection->createQueryBuilder()->willReturn($queryBuilder);
+        $this->dbalConnection->createQueryBuilder()->shouldBeCalled();
+
+        // Test shouldn't fail if we modify what to pull back, but we need event
+        $queryBuilder->select(Argument::containingString('event'))->shouldBeCalled();
+
+        $queryBuilder->from($this->tableName)->shouldBeCalled();
+        $queryBuilder->where('entity_identifier', '=', ':entity_identifier')->shouldBeCalled();
+        $queryBuilder->orderBy('recorded_at', 'ASC')->shouldBeCalled();
+        $queryBuilder->setParameter('entity_identifier', 'identifier')->shouldBeCalled();
+
+        $queryBuilder->execute()->shouldBeCalled();
+
+        $this->fetchEntityEvents('identifier');
     }
 }
