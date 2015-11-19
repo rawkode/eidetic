@@ -4,7 +4,6 @@ php:
     - 5.4
     - 5.5
     - 5.6
-    - 7.0
     - hhvm
 
 matrix:
@@ -15,6 +14,12 @@ matrix:
 before_script:
     - travis_retry composer self-update
     - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction
+    - travis_retry wget https://scrutinizer-ci.com/ocular.phar
 
 script:
-    - bin/phpcs --standard=PSR2 --warning-severity=0 src
+    - bin/phpspec run
+    - bin/phpunit
+    - bin/phpcs --standard=PSR2 src
+
+after_script:
+  - if [[ "$TRAVIS_PHP_VERSION" != "hhvm" ]] && [[ "$TRAVIS_PHP_VERSION" != "7.0" ]]; then php ocular.phar code-coverage:upload --format=php-clover var/build/logs/clover.xml; fi
