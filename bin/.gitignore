@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Except ...
+!.gitignore
+!run-all-php-cs-fixers.sh
+
