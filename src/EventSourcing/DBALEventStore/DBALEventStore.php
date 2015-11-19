@@ -135,15 +135,10 @@ final class DBALEventStore implements EventStore
         $queryBuilder = $this->dbalConnection->createQueryBuilder();
 
         $queryBuilder->select('COUNT(*)');
-
         $queryBuilder->from($this->tableName);
-
         $queryBuilder->where('entity_identifier', '=', ':entity_identifier');
-
         $queryBuilder->orderBy('recorded_at', 'DESC');
-
         $queryBuilder->setMaxResults(1);
-
         $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
 
         $statement = $queryBuilder->execute();
