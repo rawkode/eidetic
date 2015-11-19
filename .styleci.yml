@@ -1,7 +1,8 @@
 preset: psr2
+linting: true
 finder:
-  exclude:
-    - "test"
-  name:
-    - "*.php"
-    
+    path:
+        - "src"
+    name:
+        - "*.php"
+
