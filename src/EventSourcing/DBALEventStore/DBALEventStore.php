@@ -5,6 +5,8 @@ namespace Rawkode\Eidetic\EventSourcing\DBALEventStore;
 use Doctrine\DBAL\Connection;
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 use Rawkode\Eidetic\EventSourcing\EventStore\EventStore;
+use Rawkode\Eidetic\EventSourcing\EventStore\VersionMismatchException;
+use Rawkode\Eidetic\EventSourcing\EventStore\EntityDoesNotExistException;
 use Rawkode\Eidetic\EventSourcing\InvalidEventException;
 
 final class DBALEventStore implements EventStore
@@ -116,7 +118,41 @@ final class DBALEventStore implements EventStore
      */
     private function verifyVersion(EventSourcedEntity $eventSourcedEntity)
     {
-        // Get the latest version from database and compare with our entity version
+        if ($eventSourcedEntity->version() !== $this->entityVersion($eventSourcedEntity->identifier())) {
+            throw new VersionMismatchException();
+        }
+    }
+
+    /**
+     * @param string $aggregateIdentifier
+     *
+     * @return int
+     *
+     * @throws EntityDoesNotExistException
+     */
+    private function entityVersion($entityIdentifier)
+    {
+        $queryBuilder = $this->dbalConnection->createQueryBuilder();
+
+        $queryBuilder->select('COUNT(*)');
+
+        $queryBuilder->from($this->tableName);
+
+        $queryBuilder->where('entity_identifier', '=', ':entity_identifier');
+
+        $queryBuilder->orderBy('recorded_at', 'DESC');
+
+        $queryBuilder->setMaxResults(1);
+
+        $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
+
+        $statement = $queryBuilder->execute();
+
+        if ($statement->rowCount() === 0) {
+            throw new EntityDoesNotExistException();
+        }
+
+        return $statement->fetchColumn(0);
     }
 
     /**
