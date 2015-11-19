@@ -23,11 +23,11 @@
     "vendor-dir": "var/vendor"
   },
   "require": {
-    "php": ">=5.4"
+    "php": ">=5.4",
+    "fabpot/php-cs-fixer": "^1.10"
   },
   "require-dev": {
     "phpspec/phpspec": "~2.1",
-    "phpunit/phpunit": "~4.3",
-    "squizlabs/php_codesniffer": "~2.3"
+    "phpunit/phpunit": "~4.3"
   }
 }

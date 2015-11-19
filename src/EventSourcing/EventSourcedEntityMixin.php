@@ -80,9 +80,9 @@ trait EventSourcedEntityMixin
     /**
      * @param object $event
      *
-     * @return string
-     *
      * @throws EventHandlerDoesNotExist
+     *
+     * @return string
      */
     private function findEventHandler($event)
     {
