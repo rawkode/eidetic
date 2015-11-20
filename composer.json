@@ -18,6 +18,14 @@
       "Rawkode\\Eidetic\\": "src//"
     }
   },
+  "autoload-dev": {
+      "psr-4": {
+          "Rawkode\\Eidetic\\Tests\\Unit\\": "test//phpunit//unit//"
+      },
+      "psr-4": {
+          "Rawkode\\Eidetic\\Tests\\Integration\\": "test//phpunit//integration//"
+      }
+  },
   "config": {
     "bin-dir": "bin",
     "vendor-dir": "var/vendor"

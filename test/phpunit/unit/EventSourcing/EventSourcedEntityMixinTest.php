@@ -1,5 +1,7 @@
 <?php
-namespace Rawkode\Eidetic\EventSourcing;
+namespace Rawkode\Eidetic\Tests\Unit\EventSourcing;
+
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntityMixin;
 
 class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
 {
@@ -35,9 +37,9 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
 
          $this->assertCount(3, $stagedEvents);
 
-         $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEvent', $stagedEvents[0]);
-         $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEventTwo', $stagedEvents[1]);
-         $this->assertInstanceOf('Rawkode\Eidetic\EventSourcing\TestEvent', $stagedEvents[2]);
+         $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEvent', $stagedEvents[0]);
+         $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEventTwo', $stagedEvents[1]);
+         $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEvent', $stagedEvents[2]);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Rawkode\Eidetic\EventSourcing;
+namespace Rawkode\Eidetic\EventStore;
 
 final class InvalidEventException extends \Exception
 {
