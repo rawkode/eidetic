@@ -36,6 +36,21 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 ## Examples
 Examples can be found inside [`usr/share/doc/examples`](usr/share/doc/examples)
 
+## Database Setup
+Using the DBAL Event Store?
+
+```
+CREATE TABLE 'table_name'
+(
+    entity_identifier   VARCHAR(255),
+    recorded_at         DATETIME,
+    event_class         VARCHAR(255),
+    event               TEXT,
+
+    PRIMARY KEY (entity_identifier, recorded_at)
+)
+```
+
 ## Tests
 
 ~~~

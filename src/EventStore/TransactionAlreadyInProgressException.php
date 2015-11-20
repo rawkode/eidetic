@@ -1,6 +1,6 @@
 <?php
 
-namespace Rawkode\Eidetic\EventSourcing\EventStore;
+namespace Rawkode\Eidetic\EventStore;
 
 final class TransactionAlreadyInProgressException extends \Exception
 {
