@@ -40,7 +40,7 @@ final class DBALEventStore implements EventStore
      */
     public static function createWithOptions($tableName, array $options)
     {
-        $connection = DriverManager::getConnection(array('driver' => 'pdo_sqlite', 'memory' => true));
+        $connection = DriverManager::getConnection($options);
 
         return new self($tableName, $connection);
     }
@@ -76,12 +76,36 @@ final class DBALEventStore implements EventStore
      */
     public function fetchEvents($key)
     {
+        $results = $this->getEventLogs($key);
+
+        return array_map(function ($eventLog) {
+            return unserialize(base64_decode($eventLog['event']));
+        }, $results);
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return array
+     */
+    public function fetchEventLogs($key)
+    {
+        return $this->getEventLogs($key);
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    private function getEventLogs($key)
+    {
         $queryBuilder = $this->dbalConnection->createQueryBuilder();
 
         $queryBuilder->select('*');
         $queryBuilder->from($this->tableName);
         $queryBuilder->where('key = :key');
-        $queryBuilder->orderBy('recorded_at', 'ASC');
+        $queryBuilder->orderBy('serial_number', 'ASC');
+
         $queryBuilder->setParameter('key', $key);
 
         $statement = $queryBuilder->execute();
@@ -94,11 +118,13 @@ final class DBALEventStore implements EventStore
             throw new NoEventsFoundForKeyException();
         }
 
-        foreach ($results as $row) {
-            $events[] = unserialize(base64_decode($row['event']));
-        }
+        return array_map(function ($eventLog) {
+            if (true === array_key_exists('recorded_at', $eventLog)) {
+                $eventLog['recorded_at'] = new \DateTime($eventLog['recorded_at']);
+            }
 
-        return $events;
+            return $eventLog;
+        }, $results);
     }
 
     /**
@@ -120,7 +146,6 @@ final class DBALEventStore implements EventStore
     private function completeTransaction()
     {
         $this->dbalConnection->commit();
-        echo "Commited" . PHP_EOL;
     }
 
     /**
@@ -175,12 +200,18 @@ final class DBALEventStore implements EventStore
 
         $table = $schema->createTable($this->tableName);
 
+        $serialNumberColumn = $table->addColumn('serial_number', 'integer');
+        $serialNumberColumn->setAutoincrement(true);
+        $table->setPrimaryKey(['serial_number']);
+
         $table->addColumn('key', 'string', [ 'length' => 255 ]);
         $table->addColumn('recorded_at', 'datetime');
         $table->addColumn('event_class', 'string', [ 'length' => 255 ]);
         $table->addColumn('event', 'text');
 
-        // $table->addUniqueIndex([ 'key', 'recorded_at' ]);
+        $table->addIndex(['key']);
+        $table->addIndex(['recorded_at']);
+        $table->addIndex(['event_class']);
 
         $schemaManager->createTable($table);
     }
