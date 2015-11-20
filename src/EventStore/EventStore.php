@@ -16,4 +16,9 @@ interface EventStore
      * @return array
      */
     public function fetchEvents($key);
+
+    /**
+     * @param string $key
+     */
+    public function fetchEventLogs($key);
 }
