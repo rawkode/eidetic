@@ -10,6 +10,11 @@ use Rawkode\Eidetic\EventStore\TransactionAlreadyInProgressException;
 final class InMemoryEventStore implements EventStore
 {
     /**
+     * @var integer
+     */
+    private $serialNumber = 0;
+
+    /**
      * @var array
      */
     private $events = [];
@@ -33,13 +38,33 @@ final class InMemoryEventStore implements EventStore
      */
     public function fetchEvents($key)
     {
+        $eventLogs = $this->getEventLogs($key);
+
+        return array_map(function ($eventLog) {
+            return $eventLog['event'];
+        }, $eventLogs);
+    }
+
+    /**
+     * @param  string $key
+     * @return array
+     */
+    public function fetchEventLogs($key)
+    {
+        return $this->getEventLogs($key);
+    }
+
+    /**
+     * @param  string $key
+     * @return array
+     */
+    private function getEventLogs($key)
+    {
         if (false === array_key_exists($key, $this->events)) {
             throw new NoEventsFoundForKeyException();
         }
 
-        return array_map(function ($eventLog) {
-            return $eventLog['event'];
-        }, $this->events[$key]['events']);
+        return $this->events[$key];
     }
 
     /**
@@ -106,8 +131,10 @@ final class InMemoryEventStore implements EventStore
     {
         $this->verifyEventIsAClass($event);
 
-        $this->events[$key]['events'][] = [
-            'date_time' => new \DateTime('now', new \DateTimeZone('UTC')),
+        $this->events[$key][] = [
+            'serial_number' => ++$this->serialNumber,
+            'key' => $key,
+            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
             'event_class' => get_class($event),
             'event' => $event,
         ];
