@@ -1,14 +1,12 @@
 <?php
+
 namespace Rawkode\Eidetic\EventStore\DBALEventStore;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Schema\Schema;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
-use Rawkode\Eidetic\EventStore\VersionMismatchException;
-use Rawkode\Eidetic\EventStore\EntityDoesNotExistException;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 
 final class DBALEventStore implements EventStore
@@ -24,7 +22,7 @@ final class DBALEventStore implements EventStore
     private $dbalConnection;
 
     /**
-     * @param string $tableName
+     * @param string     $tableName
      * @param Connection $dbalConnection
      */
     private function __construct($tableName, Connection $dbalConnection)
@@ -34,8 +32,9 @@ final class DBALEventStore implements EventStore
     }
 
     /**
-     * @param  string $tableName
-     * @param  array  $options
+     * @param string $tableName
+     * @param array  $options
+     *
      * @return self
      */
     public static function createWithOptions($tableName, array $options)
@@ -45,10 +44,9 @@ final class DBALEventStore implements EventStore
         return new self($tableName, $connection);
     }
 
-
     /**
      * @param string $key
-     * @param array $events
+     * @param array  $events
      */
     public function saveEvents($key, array $events)
     {
@@ -58,8 +56,6 @@ final class DBALEventStore implements EventStore
             foreach ($events as $event) {
                 $this->persistEvent($key, $event);
             }
-        } catch (TransactionAlreadyInProgressException $transactionAlreadyInProgressExeception) {
-            throw $transactionAlreadyInProgressExeception;
         } catch (InvalidEventException $invalidEventException) {
             $this->abortTransaction();
 
@@ -95,6 +91,7 @@ final class DBALEventStore implements EventStore
 
     /**
      * @param string $key
+     *
      * @return array
      */
     private function getEventLogs($key)
@@ -166,7 +163,7 @@ final class DBALEventStore implements EventStore
             \PDO::PARAM_STR,
             'datetime',
             \PDO::PARAM_STR,
-            \PDO::PARAM_STR
+            \PDO::PARAM_STR,
         ]);
     }
 
@@ -204,9 +201,9 @@ final class DBALEventStore implements EventStore
         $serialNumberColumn->setAutoincrement(true);
         $table->setPrimaryKey(['serial_number']);
 
-        $table->addColumn('key', 'string', [ 'length' => 255 ]);
+        $table->addColumn('key', 'string', ['length' => 255]);
         $table->addColumn('recorded_at', 'datetime');
-        $table->addColumn('event_class', 'string', [ 'length' => 255 ]);
+        $table->addColumn('event_class', 'string', ['length' => 255]);
         $table->addColumn('event', 'text');
 
         $table->addIndex(['key']);
