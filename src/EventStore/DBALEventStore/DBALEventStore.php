@@ -19,16 +19,16 @@ final class DBALEventStore implements EventStore
     /**
      * @var Connection
      */
-    private $dbalConnection;
+    private $connection;
 
     /**
      * @param string     $tableName
-     * @param Connection $dbalConnection
+     * @param Connection $connection
      */
-    private function __construct($tableName, Connection $dbalConnection)
+    private function __construct($tableName, Connection $connection)
     {
         $this->tableName = $tableName;
-        $this->dbalConnection = $dbalConnection;
+        $this->connection = $connection;
     }
 
     /**
@@ -48,7 +48,7 @@ final class DBALEventStore implements EventStore
      * @param string $key
      * @param array  $events
      */
-    public function saveEvents($key, array $events)
+    public function store($key, array $events)
     {
         try {
             $this->startTransaction();
@@ -70,9 +70,9 @@ final class DBALEventStore implements EventStore
      *
      * @return array
      */
-    public function fetchEvents($key)
+    public function retrieve($key)
     {
-        $results = $this->getEventLogs($key);
+        $results = $this->eventLogs($key);
 
         return array_map(function ($eventLog) {
             return unserialize(base64_decode($eventLog['event']));
@@ -84,9 +84,9 @@ final class DBALEventStore implements EventStore
      *
      * @return array
      */
-    public function fetchEventLogs($key)
+    public function retrieveLogs($key)
     {
-        return $this->getEventLogs($key);
+        return $this->eventLogs($key);
     }
 
     /**
@@ -94,9 +94,9 @@ final class DBALEventStore implements EventStore
      *
      * @return array
      */
-    private function getEventLogs($key)
+    private function eventLogs($key)
     {
-        $queryBuilder = $this->dbalConnection->createQueryBuilder();
+        $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('*');
         $queryBuilder->from($this->tableName);
@@ -106,8 +106,6 @@ final class DBALEventStore implements EventStore
         $queryBuilder->setParameter('key', $key);
 
         $statement = $queryBuilder->execute();
-
-        $events = [];
 
         $results = $statement->fetchAll();
 
@@ -128,21 +126,21 @@ final class DBALEventStore implements EventStore
      */
     private function startTransaction()
     {
-        $this->dbalConnection->beginTransaction();
+        $this->connection->beginTransaction();
     }
 
     /**
      */
     private function abortTransaction()
     {
-        $this->dbalConnection->rollBack();
+        $this->connection->rollBack();
     }
 
     /**
      */
     private function completeTransaction()
     {
-        $this->dbalConnection->commit();
+        $this->connection->commit();
     }
 
     /**
@@ -154,7 +152,7 @@ final class DBALEventStore implements EventStore
     {
         $this->verifyEventIsAClass($event);
 
-        $this->dbalConnection->insert($this->tableName, [
+        $this->connection->insert($this->tableName, [
             'key' => $key,
             'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
             'event_class' => get_class($event),
@@ -175,10 +173,12 @@ final class DBALEventStore implements EventStore
     private function verifyEventIsAClass($event)
     {
         try {
-            if (false === get_class($event)) {
-                throw new InvalidEventException();
-            }
+            $class = get_class($event);
         } catch (\Exception $exception) {
+            throw new InvalidEventException();
+        }
+
+        if ($class === false) {
             throw new InvalidEventException();
         }
     }
@@ -188,7 +188,7 @@ final class DBALEventStore implements EventStore
      */
     public function createTable()
     {
-        $schemaManager = $this->dbalConnection->getSchemaManager();
+        $schemaManager = $this->connection->getSchemaManager();
         $schema = $schemaManager->createSchema();
 
         if ($schema->hasTable($this->tableName)) {
@@ -217,6 +217,6 @@ final class DBALEventStore implements EventStore
      */
     public function dropTable()
     {
-        // $this->dbalConnection->getSchemaManager()->dropTable($this->tableName);
+        $this->connection->getSchemaManager()->dropTable($this->tableName);
     }
 }

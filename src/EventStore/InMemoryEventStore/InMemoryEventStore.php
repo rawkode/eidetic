@@ -6,6 +6,8 @@ use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 
+use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
+
 final class InMemoryEventStore implements EventStore
 {
     /**
@@ -35,9 +37,9 @@ final class InMemoryEventStore implements EventStore
      *
      * @return array
      */
-    public function fetchEvents($key)
+    public function retrieve($key)
     {
-        $eventLogs = $this->getEventLogs($key);
+        $eventLogs = $this->eventLogs($key);
 
         return array_map(function ($eventLog) {
             return $eventLog['event'];
@@ -49,9 +51,9 @@ final class InMemoryEventStore implements EventStore
      *
      * @return array
      */
-    public function fetchEventLogs($key)
+    public function retrieveLogs($key)
     {
-        return $this->getEventLogs($key);
+        return $this->eventLogs($key);
     }
 
     /**
@@ -59,7 +61,7 @@ final class InMemoryEventStore implements EventStore
      *
      * @return array
      */
-    private function getEventLogs($key)
+    private function eventLogs($key)
     {
         if (false === array_key_exists($key, $this->events)) {
             throw new NoEventsFoundForKeyException();
@@ -72,10 +74,10 @@ final class InMemoryEventStore implements EventStore
      * @param string $key
      * @param array  $events
      *
-     * @throws OutOfSyncException
+     * @throws TransactionAlreadyInProgressException
      * @throws InvalidEventException
      */
-    public function saveEvents($key, array $events)
+    public function store($key, array $events)
     {
         try {
             $this->startTransaction();
@@ -95,6 +97,7 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
+     * @throws TransactionAlreadyInProgressException
      */
     private function startTransaction()
     {
@@ -149,10 +152,12 @@ final class InMemoryEventStore implements EventStore
     private function verifyEventIsAClass($event)
     {
         try {
-            if (false === get_class($event)) {
-                throw new InvalidEventException();
-            }
+            $class = get_class($event);
         } catch (\Exception $exception) {
+            throw new InvalidEventException();
+        }
+
+        if ($class === false) {
             throw new InvalidEventException();
         }
     }
