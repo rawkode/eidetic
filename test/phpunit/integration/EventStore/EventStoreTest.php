@@ -37,7 +37,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function it_throws_no_events_for_key_exception_when_no_events_exist()
+    public function it_throws_an_exception_when_loading_an_invalid_key()
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException');
 
@@ -47,7 +47,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function it_can_save_and_fetch_events()
+    public function it_can_save_and_load_events_by_their_key()
     {
         $this->eventStore->saveEvents('uuid-1', $this->validEvents);
 
@@ -59,7 +59,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_saves_the_correct_event_log_meta_data()
     {
-        $now = new \DateTime("now", new \DateTimeZone("UTC"));
+        $now = new \DateTime('now', new \DateTimeZone('UTC'));
 
         $this->eventStore->saveEvents('uuid-1', $this->validEvents);
 
@@ -70,7 +70,6 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 
         // Ensure event_class is saved correctly
         $this->assertEquals('stdClass', $eventLogs[0]['event_class']);
-
     }
 
     /**
@@ -83,7 +82,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $eventLogs = $this->eventStore->fetchEventLogs('uuid-1');
 
         $counter = 0;
-        
+
         array_map(function ($eventLog) {
             $this->assertEquals(++$counter, $eventLog['serial_number']);
         }, $eventLogs);
@@ -92,7 +91,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function it_throws_invalid_event_exception_when_event_is_not_an_object()
+    public function it_does_not_allow_events_that_are_not_objects()
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\InvalidEventException');
 
@@ -102,7 +101,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function it_rollbacks_the_transaction_during_an_exception()
+    public function it_can_rollback_a_transaction_after_an_error()
     {
         $this->eventStore->saveEvents('uuid-1', $this->validEvents);
 
