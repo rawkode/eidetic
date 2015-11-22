@@ -5,12 +5,11 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventStore\TransactionAlreadyInProgressException;
 
 final class InMemoryEventStore implements EventStore
 {
     /**
-     * @var integer
+     * @var int
      */
     private $serialNumber = 0;
 
@@ -46,7 +45,8 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param  string $key
+     * @param string $key
+     *
      * @return array
      */
     public function fetchEventLogs($key)
@@ -55,7 +55,8 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param  string $key
+     * @param string $key
+     *
      * @return array
      */
     private function getEventLogs($key)
