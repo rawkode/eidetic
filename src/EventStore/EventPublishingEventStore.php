@@ -32,7 +32,7 @@ final class EventPublishingEventStore implements EventStore
     /**
      * @param EventSourcedEntity $eventSourcedEntity
      */
-    public function save(EventSourcedEntity $eventSourcedEntity)
+    public function store(EventSourcedEntity $eventSourcedEntity)
     {
         $stagedEvents = $eventSourcedEntity->stagedEvents();
 
@@ -46,9 +46,19 @@ final class EventPublishingEventStore implements EventStore
      *
      * @return array
      */
-    public function fetchEntityEvents($identifier)
+    public function retrieve($identifier)
     {
         return $this->eventStore->retrieve($identifier);
+    }
+
+    /**
+     * @param string $identifier
+     *
+     * @return array
+     */
+    public function retrieveLogs($identifier)
+    {
+        return $this->eventStore->retrieveLogs($identifier);
     }
 
     /**
