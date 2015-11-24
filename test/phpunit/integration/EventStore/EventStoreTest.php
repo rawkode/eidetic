@@ -41,7 +41,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException');
 
-        $this->eventStore->fetchEvents('uuid-1');
+        $this->eventStore->retrieve('uuid-1');
     }
 
     /**
@@ -49,9 +49,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_can_save_and_load_events_by_their_key()
     {
-        $this->eventStore->saveEvents('uuid-1', $this->validEvents);
+        $this->eventStore->store('uuid-1', $this->validEvents);
 
-        $this->assertEquals($this->validEvents, $this->eventStore->fetchEvents('uuid-1'));
+        $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
     }
 
     /**
@@ -61,9 +61,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $now = new \DateTime('now', new \DateTimeZone('UTC'));
 
-        $this->eventStore->saveEvents('uuid-1', $this->validEvents);
+        $this->eventStore->store('uuid-1', $this->validEvents);
 
-        $eventLogs = $this->eventStore->fetchEventLogs('uuid-1');
+        $eventLogs = $this->eventStore->retrieveLogs('uuid-1');
 
         // Ensure that the time inserted into the event store is within a minute of UTC now
         $this->assertEquals('0', $now->diff($eventLogs[0]['recorded_at'])->format('%i'));
@@ -77,9 +77,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_loads_events_in_the_correct_order()
     {
-        $this->eventStore->saveEvents('uuid-1', $this->validEvents);
+        $this->eventStore->store('uuid-1', $this->validEvents);
 
-        $eventLogs = $this->eventStore->fetchEventLogs('uuid-1');
+        $eventLogs = $this->eventStore->retrieve('uuid-1');
 
         $counter = 0;
 
@@ -95,7 +95,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\InvalidEventException');
 
-        $this->eventStore->saveEvents('uuid-1', $this->invalidEvents);
+        $this->eventStore->store('uuid-1', $this->invalidEvents);
     }
 
     /**
@@ -103,12 +103,12 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_can_rollback_a_transaction_after_an_error()
     {
-        $this->eventStore->saveEvents('uuid-1', $this->validEvents);
+        $this->eventStore->store('uuid-1', $this->validEvents);
 
         $this->setExpectedException('Rawkode\Eidetic\EventStore\InvalidEventException');
 
-        $this->eventStore->saveEvents('uuid-1', $this->invalidEvents);
+        $this->eventStore->store('uuid-1', $this->invalidEvents);
 
-        $this->assertEquals($this->validEvents, $this->eventStore->fetchEvents('uuid-1'));
+        $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
     }
 }

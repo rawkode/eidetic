@@ -8,17 +8,17 @@ interface EventStore
      * @param string $key
      * @param array  $events
      */
-    public function saveEvents($key, array $events);
+    public function store($key, array $events);
 
     /**
      * @param string $key
      *
      * @return array
      */
-    public function fetchEvents($key);
+    public function retrieve($key);
 
     /**
      * @param string $key
      */
-    public function fetchEventLogs($key);
+    public function retrieveLogs($key);
 }
