@@ -145,8 +145,7 @@ final class DBALEventStore implements EventStore
 
     /**
      * @param string $entityIdentifier
-     * @param  $event
-     * @param int $version
+     * @param object $event
      */
     private function persistEvent($key, $event)
     {
@@ -184,7 +183,6 @@ final class DBALEventStore implements EventStore
     }
 
     /**
-     * @return Table
      */
     public function createTable()
     {
