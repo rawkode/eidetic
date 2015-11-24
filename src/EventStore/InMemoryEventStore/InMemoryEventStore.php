@@ -5,10 +5,13 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
+use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
+use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 
 final class InMemoryEventStore implements EventStore
 {
+    use VerifyEventIsAClassTrait;
+
     /**
      * @var int
      */
@@ -30,9 +33,7 @@ final class InMemoryEventStore implements EventStore
     private $transactionBackup = [];
 
     /**
-     * @param string $identifier
-     *
-     * @throws NoEventsForIdentifierException
+     * @param string $key
      *
      * @return array
      */
@@ -57,6 +58,8 @@ final class InMemoryEventStore implements EventStore
 
     /**
      * @param string $key
+     *
+     * @throws NoEventsFoundForKeyException
      *
      * @return array
      */
@@ -141,23 +144,5 @@ final class InMemoryEventStore implements EventStore
             'event_class' => get_class($event),
             'event' => $event,
         ];
-    }
-
-    /**
-     * @param object $event
-     *
-     * @throws InvalidArgumentException
-     */
-    private function verifyEventIsAClass($event)
-    {
-        try {
-            $class = get_class($event);
-        } catch (\Exception $exception) {
-            throw new InvalidEventException();
-        }
-
-        if ($class === false) {
-            throw new InvalidEventException();
-        }
     }
 }
