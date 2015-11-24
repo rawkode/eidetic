@@ -36,7 +36,7 @@ final class EventPublishingEventStore implements EventStore
     {
         $stagedEvents = $eventSourcedEntity->stagedEvents();
 
-        $this->eventStore->store($eventSourcedEntity);
+        $this->eventStore->store($eventSourcedEntity->stagedEvents());
 
         $this->publish($stagedEvents);
     }
