@@ -56,7 +56,7 @@ final class EventPublishingEventStore implements EventStore
      *
      * @return array
      */
-    public function retrieveEventLogs($identifier)
+    public function retrieveLogs($identifier)
     {
         return $this->eventStore->retrieveEventLogs($identifier);
     }
