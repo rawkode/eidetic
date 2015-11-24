@@ -8,9 +8,12 @@ use Doctrine\DBAL\Schema\Table;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
+use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 
 final class DBALEventStore implements EventStore
 {
+    use VerifyEventIsAClassTrait;
+
     /**
      * @var string
      */
@@ -144,7 +147,7 @@ final class DBALEventStore implements EventStore
     }
 
     /**
-     * @param string $entityIdentifier
+     * @param string $key
      * @param object $event
      */
     private function persistEvent($key, $event)
@@ -162,24 +165,6 @@ final class DBALEventStore implements EventStore
             \PDO::PARAM_STR,
             \PDO::PARAM_STR,
         ]);
-    }
-
-    /**
-     * @param object $event
-     *
-     * @throws InvalidArgumentException
-     */
-    private function verifyEventIsAClass($event)
-    {
-        try {
-            $class = get_class($event);
-        } catch (\Exception $exception) {
-            throw new InvalidEventException();
-        }
-
-        if ($class === false) {
-            throw new InvalidEventException();
-        }
     }
 
     /**
