@@ -5,7 +5,6 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-
 use Rawkode\Eidetic\EventSourcing\EventStore\TransactionAlreadyInProgressException;
 
 final class InMemoryEventStore implements EventStore
