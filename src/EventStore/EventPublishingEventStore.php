@@ -36,7 +36,7 @@ final class EventPublishingEventStore implements EventStore
     {
         $stagedEvents = $eventSourcedEntity->stagedEvents();
 
-        $this->eventStore->save($eventSourcedEntity);
+        $this->eventStore->store($eventSourcedEntity);
 
         $this->publish($stagedEvents);
     }
@@ -48,7 +48,7 @@ final class EventPublishingEventStore implements EventStore
      */
     public function fetchEntityEvents($identifier)
     {
-        return $this->eventStore->fetchEntityEvents($identifier);
+        return $this->eventStore->retrieve($identifier);
     }
 
     /**
