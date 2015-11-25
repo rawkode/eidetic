@@ -40,13 +40,17 @@ trait EventSourcedEntityMixin
     /**
      * @param array $eventStream
      */
-    public function initialise(array $eventStream)
+    public static function initialise(array $eventStream)
     {
+        $entity = new self;
+
         foreach ($eventStream as $event) {
-            $this->applyEvent($event);
+            $entity->applyEvent($event);
         }
 
-        $this->commit();
+        $entity->commit();
+
+        return $entity;
     }
 
     /**

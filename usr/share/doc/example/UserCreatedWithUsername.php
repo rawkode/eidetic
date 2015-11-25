@@ -1,5 +1,7 @@
 <?php
 
+namespace Example;
+
 final class UserCreatedWithUsername
 {
     /** @var string */
