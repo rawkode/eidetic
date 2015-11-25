@@ -7,11 +7,13 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Table;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 
 final class DBALEventStore implements EventStore
 {
+    use EventPublisherMixin;
     use VerifyEventIsAClassTrait;
 
     /**
