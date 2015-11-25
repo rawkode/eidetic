@@ -2,8 +2,6 @@
 
 namespace Rawkode\Eidetic\EventStore;
 
-use Doctrine\Common\EventSubscriber;
-
 trait EventPublisherMixin
 {
     /**
