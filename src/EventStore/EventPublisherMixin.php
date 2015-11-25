@@ -2,18 +2,32 @@
 
 namespace Rawkode\Eidetic\EventStore;
 
+use Doctrine\Common\EventSubscriber;
+
 trait EventPublisherMixin
 {
     /**
-     * @var object
+     * @var array
      */
     private $eventSubscribers = [ ];
 
     /**
-     * @param object $eventSubscriber
+     * @param EventSubscriber $eventSubscriber
      */
     public function registerEventSubscriber($eventSubscriber)
     {
         array_push($this->eventSubscribers, $eventSubscriber);
+    }
+
+    /**
+     * @param  int $eventHook
+     * @param  object $event
+     */
+    public function publish($eventHook, $event)
+    {
+        /** @var EventSubscriber $eventSubscriber */
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $this->eventSubscriber->handle($eventHook, $event);
+        }
     }
 }

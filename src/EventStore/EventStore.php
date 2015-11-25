@@ -2,8 +2,13 @@
 
 namespace Rawkode\Eidetic\EventStore;
 
+use Doctrine\Common\EventSubscriber;
+
 interface EventStore
 {
+    // Subscriber hooks
+    const EVENT_STORED = 0b00000001;
+
     /**
      * @param string $key
      * @param array  $events
@@ -23,7 +28,7 @@ interface EventStore
     public function retrieveLogs($key);
 
     /**
-     * @param  object $eventSubscriber
+     * @param  EventSubscriber $eventSubscriber
      */
     public function registerEventSubscriber($eventSubscriber);
 }

@@ -9,6 +9,7 @@ use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventStore\EventPublisher;
+use Doctrine\Common\EventSubscriber;
 
 final class InMemoryEventStore implements EventStore
 {
@@ -147,5 +148,10 @@ final class InMemoryEventStore implements EventStore
             'event_class' => get_class($event),
             'event' => $event,
         ];
+
+        /** @var EventSubscriber $eventSubscriber */
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $eventSubscriber->handle(self::EVENT_STORED, $event);
+        }
     }
 }
