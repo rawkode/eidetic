@@ -4,12 +4,15 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
+use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
+use Rawkode\Eidetic\EventStore\EventPublisher;
 
 final class InMemoryEventStore implements EventStore
 {
+    use EventPublisherMixin;
     use VerifyEventIsAClassTrait;
 
     /**

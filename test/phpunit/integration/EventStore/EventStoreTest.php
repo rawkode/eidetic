@@ -111,4 +111,12 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
     }
+
+    /**
+     * @test
+     */
+    public function event_subscribers_can_register_themselves()
+    {
+        $this->eventStore->registerEventSubscriber(new \stdClass);
+    }
 }
