@@ -27,14 +27,14 @@ final class InMemoryEventStore implements EventStore
     private $events = [];
 
     /**
-     * @var bool
+     * @var array
      */
-    private $transactionInProgress = false;
+    private $transactionBackup = [];
 
     /**
      * @var array
      */
-    private $transactionBackup = [];
+    private $stagedEvents = [];
 
     /**
      * @param string $key
@@ -91,8 +91,6 @@ final class InMemoryEventStore implements EventStore
             foreach ($events as $event) {
                 $this->persistEvent($key, $event);
             }
-        } catch (TransactionAlreadyInProgressException $transactionAlreadyInProgressExeception) {
-            throw $transactionAlreadyInProgressExeception;
         } catch (InvalidEventException $invalidEventException) {
             $this->abortTransaction();
 
@@ -107,12 +105,8 @@ final class InMemoryEventStore implements EventStore
      */
     private function startTransaction()
     {
-        if (true === $this->transactionInProgress) {
-            throw new TransactionAlreadyInProgressException();
-        }
-
         $this->transactionBackup = $this->events;
-        $this->transactionInProgress = true;
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -120,7 +114,7 @@ final class InMemoryEventStore implements EventStore
     private function abortTransaction()
     {
         $this->events = $this->transactionBackup;
-        $this->transactionInProgress = false;
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -128,7 +122,12 @@ final class InMemoryEventStore implements EventStore
     private function completeTransaction()
     {
         $this->transactionBackup = [];
-        $this->transactionInProgress = false;
+
+        foreach ($this->stagedEvents as $event) {
+            $this->publish(self::EVENT_STORED, $event);
+        }
+
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -149,9 +148,6 @@ final class InMemoryEventStore implements EventStore
             'event' => $event,
         ];
 
-        /** @var EventSubscriber $eventSubscriber */
-        foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventSubscriber->handle(self::EVENT_STORED, $event);
-        }
+        array_push($this->stagedEvents, $event);
     }
 }

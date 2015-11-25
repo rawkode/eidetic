@@ -26,6 +26,9 @@ final class DBALEventStore implements EventStore
      */
     private $connection;
 
+    /** @var array */
+    private $stagedEvents = [ ];
+
     /**
      * @param string     $tableName
      * @param Connection $connection
@@ -132,6 +135,7 @@ final class DBALEventStore implements EventStore
     private function startTransaction()
     {
         $this->connection->beginTransaction();
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -139,6 +143,7 @@ final class DBALEventStore implements EventStore
     private function abortTransaction()
     {
         $this->connection->rollBack();
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -146,6 +151,12 @@ final class DBALEventStore implements EventStore
     private function completeTransaction()
     {
         $this->connection->commit();
+
+        foreach ($this->stagedEvents as $event) {
+            $this->publish(self::EVENT_STORED, $event);
+        }
+
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -168,10 +179,7 @@ final class DBALEventStore implements EventStore
             \PDO::PARAM_STR,
         ]);
 
-        /** @var EventSubscriber $eventSubscriber */
-        foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventSubscriber->handle(self::EVENT_STORED, $event);
-        }
+        array_push($this->stagedEvents, $event);
     }
 
     /**

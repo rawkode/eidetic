@@ -27,7 +27,7 @@ trait EventPublisherMixin
     {
         /** @var EventSubscriber $eventSubscriber */
         foreach ($this->eventSubscribers as $eventSubscriber) {
-            $this->eventSubscriber->handle($eventHook, $event);
+            $eventSubscriber->handle($eventHook, $event);
         }
     }
 }

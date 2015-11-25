@@ -31,4 +31,10 @@ interface EventStore
      * @param  EventSubscriber $eventSubscriber
      */
     public function registerEventSubscriber($eventSubscriber);
+
+    /**
+     * @param  int $eventHook
+     * @param  object $event
+     */
+    public function publish($eventHook, $event);
 }
