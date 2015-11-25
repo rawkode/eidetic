@@ -16,17 +16,18 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 - CQRS
   - Read model repositories
     - Elasticsearch
-    - Doctrine ORM
-    - Eloquent
+    - PDO PostgreSQL: jsonb :) (Pending)
+    - DynamoDb (Pending)
   - Write model repositories
     - Event Store
-    - Doctrine ORM
-    - Eloquent
 
 
 - Event Stores
   - InMemory
   - Doctrine DBAL
+  - PDO (Pending)
+  - DynamoDb (Pending)
+  - Mongo (Pending)
 
 
 - Event Publishers
@@ -37,26 +38,15 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 ## Examples
 Examples can be found inside [`usr/share/doc/examples`](usr/share/doc/examples)
 
-## Database Setup
-Using the DBAL Event Store?
+## Installation
+```composer require rawkode/eidetic```
 
-```
-CREATE TABLE 'table_name'
-(
-    entity_identifier   VARCHAR(255),
-    recorded_at         DATETIME,
-    event_class         VARCHAR(255),
-    event               TEXT,
-
-    PRIMARY KEY (entity_identifier, recorded_at)
-)
-```
+Sorry! As this is extremely experimental at the moment, please use ```dev-master```.
 
 ## Tests
 
 ~~~
 bin/phpunit
-bin/phpspec run --format=pretty
 ~~~
 
 ## Contributing
