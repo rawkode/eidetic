@@ -1,8 +1,13 @@
 <?php
 
-final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
+namespace Example;
+
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntityMixin;
+
+final class User implements EventSourcedEntity
 {
-    use Rawkode\Eidetic\EventSourcing\EventSourcedEntityMixin;
+    use EventSourcedEntityMixin;
 
     /** @var string */
     private $username;
@@ -12,6 +17,7 @@ final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
      */
     private function __construct()
     {
+        $this->identifier = uniqid('user-');
     }
 
     /**
@@ -20,7 +26,7 @@ final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
      */
     public static function createWithUsername($username)
     {
-        $user = new User();
+        $user = new self;
         $user->applyEvent(new UserCreatedWithUsername($username));
 
         return $user;
@@ -35,7 +41,14 @@ final class User implements Rawkode\Eidetic\EventSourcing\EventSourcedEntity
     }
 
     /**
-     * Get this users username
+     * @return string
+     */
+    public function identifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
      * @return string
      */
     public function username()

@@ -19,7 +19,7 @@ interface EventSourcedEntity
      *
      * @param array $eventStream
      */
-    public function initialise(array $eventStream);
+    public static function initialise(array $eventStream);
 
     /**
      * Return a list of staged events.

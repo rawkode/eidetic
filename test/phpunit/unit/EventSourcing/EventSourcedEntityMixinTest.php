@@ -65,13 +65,13 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
      */
     public function it_can_initialise_itself()
     {
-        $this->initialise([
+        $entity = $this::initialise([
             new TestEvent(),
             new TestEventTwo()
         ]);
 
-        $this->assertEquals(2, $this->version());
-        $this->assertCount(0, $this->stagedEvents());
+        $this->assertEquals(2, $entity->version());
+        $this->assertCount(0, $entity->stagedEvents());
     }
 
     private function applyTestEvent()
