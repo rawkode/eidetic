@@ -4,12 +4,16 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
+use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
+use Rawkode\Eidetic\EventStore\EventPublisher;
+use Doctrine\Common\EventSubscriber;
 
 final class InMemoryEventStore implements EventStore
 {
+    use EventPublisherMixin;
     use VerifyEventIsAClassTrait;
 
     /**
@@ -23,14 +27,14 @@ final class InMemoryEventStore implements EventStore
     private $events = [];
 
     /**
-     * @var bool
+     * @var array
      */
-    private $transactionInProgress = false;
+    private $transactionBackup = [];
 
     /**
      * @var array
      */
-    private $transactionBackup = [];
+    private $stagedEvents = [];
 
     /**
      * @param string $key
@@ -87,8 +91,6 @@ final class InMemoryEventStore implements EventStore
             foreach ($events as $event) {
                 $this->persistEvent($key, $event);
             }
-        } catch (TransactionAlreadyInProgressException $transactionAlreadyInProgressExeception) {
-            throw $transactionAlreadyInProgressExeception;
         } catch (InvalidEventException $invalidEventException) {
             $this->abortTransaction();
 
@@ -103,12 +105,8 @@ final class InMemoryEventStore implements EventStore
      */
     private function startTransaction()
     {
-        if (true === $this->transactionInProgress) {
-            throw new TransactionAlreadyInProgressException();
-        }
-
         $this->transactionBackup = $this->events;
-        $this->transactionInProgress = true;
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -116,7 +114,7 @@ final class InMemoryEventStore implements EventStore
     private function abortTransaction()
     {
         $this->events = $this->transactionBackup;
-        $this->transactionInProgress = false;
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -124,7 +122,12 @@ final class InMemoryEventStore implements EventStore
     private function completeTransaction()
     {
         $this->transactionBackup = [];
-        $this->transactionInProgress = false;
+
+        foreach ($this->stagedEvents as $event) {
+            $this->publish(self::EVENT_STORED, $event);
+        }
+
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -144,5 +147,7 @@ final class InMemoryEventStore implements EventStore
             'event_class' => get_class($event),
             'event' => $event,
         ];
+
+        array_push($this->stagedEvents, $event);
     }
 }

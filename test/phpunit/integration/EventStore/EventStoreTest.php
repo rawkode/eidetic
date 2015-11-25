@@ -1,6 +1,7 @@
 <?php
 
 namespace Rawkode\Eidetic\Tests\Integration\EventStore;
+use Rawkode\Eidetic\EventStore\EventStore;
 
 abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 {
@@ -110,5 +111,26 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $this->eventStore->store('uuid-1', $this->invalidEvents);
 
         $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_publish_events_to_subscribers()
+    {
+        $event = new \stdClass;
+
+        // Create Mock
+        $subscriber = $this->getMockBuilder('Rawkode\Eidetic\EventStore\EventSubscriber')
+            ->setMethods(array('handle'))
+            ->getMock();
+
+        $subscriber->expects($this->once())
+            ->method('handle')
+            ->with(EventStore::EVENT_STORED, $event);
+
+        $this->eventStore->registerEventSubscriber($subscriber);
+
+        $this->eventStore->store('uuid-1', [ $event ]);
     }
 }
