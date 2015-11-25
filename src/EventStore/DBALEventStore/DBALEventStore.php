@@ -7,11 +7,13 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Table;
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 
 final class DBALEventStore implements EventStore
 {
+    use EventPublisherMixin;
     use VerifyEventIsAClassTrait;
 
     /**
@@ -23,6 +25,9 @@ final class DBALEventStore implements EventStore
      * @var Connection
      */
     private $connection;
+
+    /** @var array */
+    private $stagedEvents = [ ];
 
     /**
      * @param string     $tableName
@@ -130,6 +135,7 @@ final class DBALEventStore implements EventStore
     private function startTransaction()
     {
         $this->connection->beginTransaction();
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -137,6 +143,7 @@ final class DBALEventStore implements EventStore
     private function abortTransaction()
     {
         $this->connection->rollBack();
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -144,6 +151,12 @@ final class DBALEventStore implements EventStore
     private function completeTransaction()
     {
         $this->connection->commit();
+
+        foreach ($this->stagedEvents as $event) {
+            $this->publish(self::EVENT_STORED, $event);
+        }
+
+        $this->stagedEvents = [ ];
     }
 
     /**
@@ -165,6 +178,8 @@ final class DBALEventStore implements EventStore
             \PDO::PARAM_STR,
             \PDO::PARAM_STR,
         ]);
+
+        array_push($this->stagedEvents, $event);
     }
 
     /**
