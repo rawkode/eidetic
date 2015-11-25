@@ -10,6 +10,9 @@
 ---
 Eidetic is a CQRS and EventSourcing library for php >= 5.4
 
+#### Extremely Alpha
+**Please do not use this library for anything important - it's API is likely to change over the coming weeks**
+
 ## Status
 Eidetic is currently under initial development, aiming for 1.0 in December, 2015. The aim is to provide helpers that allow you to implement CQRS and EventSourcing in your application.
 
