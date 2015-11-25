@@ -167,6 +167,11 @@ final class DBALEventStore implements EventStore
             \PDO::PARAM_STR,
             \PDO::PARAM_STR,
         ]);
+
+        /** @var EventSubscriber $eventSubscriber */
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $eventSubscriber->handle(self::EVENT_STORED, $event);
+        }
     }
 
     /**
