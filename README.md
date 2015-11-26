@@ -39,7 +39,7 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 
 
 ## Examples
-Examples can be found inside [`usr/share/doc/examples`](usr/share/doc/examples)
+Examples can be found inside [`usr/share/doc/example`](usr/share/doc/example)
 
 ## Installation
 ```composer require rawkode/eidetic```
