@@ -9,7 +9,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
 
 ---
-Eidetic is a CQRS and EventSourcing library for php >= 5.4
+Eidetic is a CQRS and EventSourcing library for php >= 5.5
 
 #### Extremely Alpha
 **Please do not use this library for anything important - it's API is likely to change over the coming weeks**
