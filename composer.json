@@ -31,12 +31,12 @@
     "vendor-dir": "var/vendor"
   },
   "require": {
-    "php": ">=5.4",
-    "doctrine/dbal": "2.5.2"
+    "php": ">=5.5",
+    "doctrine/dbal": "^2.5"
   },
   "require-dev": {
-    "phpspec/phpspec": "~2.1",
-    "phpunit/phpunit": "~4.3",
+    "phpspec/phpspec": "^2.1",
+    "phpunit/phpunit": "^5.0",
     "fabpot/php-cs-fixer": "^1.10"
   }
 }
