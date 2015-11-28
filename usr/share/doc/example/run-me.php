@@ -5,16 +5,38 @@ require_once 'User.php';
 require_once 'UserRepository.php';
 require_once 'UserCreatedWithUsername.php';
 
-use Rawkode\Eidetic\EventStore\DBALEventStore\DBALEventStore;
-use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 use Example\User;
 use Example\UserRepository;
+use Rawkode\Eidetic\EventStore\DBALEventStore\DBALEventStore;
+
+use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
+use Rawkode\Eidetic\EventStore\Symfony2EventDispatcherSubscriber\Symfony2EventDispatcherSubscriber;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
+// Symfony2 Event Dispatcher
+$symfony2EventDispatcher = new EventDispatcher();
+$symfony2EventDispatcher->addListener(EventStore::EVENT_STORED, 'thisIsMyListener');
+
+// Event Dispatcher Listener ... ish
+function thisIsMyListener(Event $event)
+{
+    echo "Hello, I am the Symfony2 Event Dispatcher Listener!" . PHP_EOL;
+    var_dump($event->event());
+}
+
+// Now create our integration class and pass in the dispatcher
+$symfony2EventDispatcherSubscriber = new symfony2EventDispatcherSubscriber($symfony2EventDispatcher);
 
 // We need an EventStore. We'll use the DBAL with in-memory sqlite
 $eventStore = DBALEventStore::createWithOptions('events', [
     'driver' => 'pdo_sqlite',
     'memory' => true
 ]);
+
+// Register :D
+$eventStore->registerEventSubscriber($symfony2EventDispatcherSubscriber);
 
 // Create the table we need
 $eventStore->createTable();
