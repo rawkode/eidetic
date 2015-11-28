@@ -129,7 +129,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
             ->method('handle')
             ->with(EventStore::EVENT_STORED, $event);
 
-        $this->eventStore->registerEventSubscriber($subscriber);
+        $this->eventStore->registerSubscriber($subscriber);
 
         $this->eventStore->store('uuid-1', [ $event ]);
     }

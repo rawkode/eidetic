@@ -7,14 +7,14 @@ trait EventPublisherMixin
     /**
      * @var array
      */
-    private $eventSubscribers = [ ];
+    private $subscribers = [ ];
 
     /**
-     * @param EventSubscriber $eventSubscriber
+     * @param Subscriber $subscriber
      */
-    public function registerEventSubscriber($eventSubscriber)
+    public function registerSubscriber($subscriber)
     {
-        array_push($this->eventSubscribers, $eventSubscriber);
+        array_push($this->subscribers, $subscriber);
     }
 
     /**
@@ -23,9 +23,9 @@ trait EventPublisherMixin
      */
     public function publish($eventHook, $event)
     {
-        /** @var EventSubscriber $eventSubscriber */
-        foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventSubscriber->handle($eventHook, $event);
+        /** @var Subscriber $subscriber */
+        foreach ($this->subscribers as $subscriber) {
+            $subscriber->handle($eventHook, $event);
         }
     }
 }

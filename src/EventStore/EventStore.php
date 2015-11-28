@@ -26,9 +26,9 @@ interface EventStore
     public function retrieveLogs($key);
 
     /**
-     * @param  EventSubscriber $eventSubscriber
+     * @param  Subscriber $subscriber
      */
-    public function registerEventSubscriber($eventSubscriber);
+    public function registerSubscriber($subscriber);
 
     /**
      * @param  int $eventHook
