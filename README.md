@@ -1,14 +1,16 @@
 # Eidetic
 
 [![Software License](https://img.shields.io/github/license/rawkode/eidetic.svg?style=flat-square)](LICENSE)
-[![Latest Version](https://img.shields.io/packagist/v/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
 [![Build Status](https://img.shields.io/travis/rawkode/eidetic/master.svg?style=flat-square)](https://travis-ci.org/rawkode/eidetic)
 [![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/rawkode/eidetic.svg?style=flat-square)](https://scrutinizer-ci.com/g/rawkode/eidetic)
 [![Quality Score](https://img.shields.io/scrutinizer/g/rawkode/eidetic.svg?style=flat-square)](https://scrutinizer-ci.com/g/rawkode/eidetic)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0/small.png)](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0)
+
+[![Latest Version](https://img.shields.io/packagist/v/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
 [![Total Downloads](https://img.shields.io/packagist/dt/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
 
 ---
-Eidetic is a CQRS and EventSourcing library for php >= 5.4
+Eidetic is a CQRS and EventSourcing library for php >= 5.5
 
 #### Extremely Alpha
 **Please do not use this library for anything important - it's API is likely to change over the coming weeks**

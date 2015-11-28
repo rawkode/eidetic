@@ -2,7 +2,6 @@
 
 namespace Rawkode\Eidetic\EventStore\Symfony2EventDispatcherSubscriber;
 
-use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\EventSubscriber;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
