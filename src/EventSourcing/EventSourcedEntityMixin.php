@@ -2,8 +2,6 @@
 
 namespace Rawkode\Eidetic\EventSourcing;
 
-use Rawkode\Eidetic\EventHandlerDoesNotExist;
-
 trait EventSourcedEntityMixin
 {
     /**
