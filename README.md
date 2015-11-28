@@ -13,6 +13,15 @@ Eidetic is a CQRS and EventSourcing library for php >= 5.4
 #### Extremely Alpha
 **Please do not use this library for anything important - it's API is likely to change over the coming weeks**
 
+## Why not Broadway?
+Yes - I've seen Broadway and it's a fantastic package, but it wasn't for me.
+
+  * I don't always want to use the Aggregate pattern
+  * I don't really want to use inheritance for my entities
+  * I **really** don't want to use inheritance for my events
+
+This package should allow people to dip their toe in the CQRS waters and allow them to consider if using reactive / event based systems will work for them; even if that's simply setting up an EventStore to provide a basic audit trail for a legacy application.
+
 ## Status
 Eidetic is currently under initial development, aiming for 1.0 in December, 2015. The aim is to provide helpers that allow you to implement CQRS and EventSourcing in your application.
 
