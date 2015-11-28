@@ -5,7 +5,7 @@ namespace Rawkode\Eidetic\EventStore;
 interface EventStore
 {
     // Subscriber hooks
-    const EVENT_STORED = 0b00000001;
+    const EVENT_STORED = "eidetic.eventstore.event_stored";
 
     /**
      * @param string $key
@@ -26,9 +26,9 @@ interface EventStore
     public function retrieveLogs($key);
 
     /**
-     * @param  EventSubscriber $eventSubscriber
+     * @param  Subscriber $subscriber
      */
-    public function registerEventSubscriber($eventSubscriber);
+    public function registerSubscriber($subscriber);
 
     /**
      * @param  int $eventHook

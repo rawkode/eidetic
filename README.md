@@ -18,9 +18,9 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 
 - CQRS
   - Read model repositories
-    - Elasticsearch
-    - PDO PostgreSQL: jsonb :) (Pending)
-    - DynamoDb (Pending)
+    - Elasticsearch **(Pending)**
+    - PDO PostgreSQL: jsonb :) **(Pending)**
+    - DynamoDb **(Pending)**
   - Write model repositories
     - Event Store
 
@@ -28,14 +28,14 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 - Event Stores
   - InMemory
   - Doctrine DBAL
-  - PDO (Pending)
-  - DynamoDb (Pending)
-  - Mongo (Pending)
+  - PDO **(Pending)**
+  - DynamoDb **(Pending)**
+  - Mongo **(Pending)**
 
 
-- Event Publishers
-  - MessageBus
-  - Tactician
+- Event Subscribers
+  - Amazon Kinesis **(Pending)**
+  - Symfony2 Event Dispatcher
 
 
 ## Examples
@@ -50,6 +50,7 @@ Sorry! As this is extremely experimental at the moment, please use ```dev-master
 
 ~~~
 bin/phpunit
+bin/phpspec run --format=pretty
 ~~~
 
 ## Contributing
