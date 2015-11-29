@@ -36,7 +36,7 @@ $eventStore = DBALEventStore::createWithOptions('events', [
 ]);
 
 // Register :D
-$eventStore->registerEventSubscriber($symfony2EventDispatcherSubscriber);
+$eventStore->registerSubscriber($symfony2EventDispatcherSubscriber);
 
 // Create the table we need
 $eventStore->createTable();
