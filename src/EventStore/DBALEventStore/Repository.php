@@ -45,6 +45,7 @@ final class Repository
     public function load($identifier)
     {
         $entity = $this->entityClass;
+        $this->enforceTypeConstraint($entity);
         $events = $this->eventStore->retrieve($identifier);
 
         return $entity::initialise($events);
