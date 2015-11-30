@@ -1,13 +1,12 @@
 <?php
 
-namespace Rawkode\Eidetic\EventStore\DBALEventStore;
+namespace Rawkode\Eidetic\EventSourcing;
 
-use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 use Rawkode\Eidetic\EventStore\EventStore;
 
 /**
  * Class Repository
- * @package Rawkode\Eidetic\EventStore\DBALEventStore
+ * @package Rawkode\Eidetic\EventSourcing
  */
 final class Repository
 {
@@ -18,7 +17,7 @@ final class Repository
     private $eventStore;
 
     /**
-     * @param EventSourcedEntity $class
+     * @param string $class
      * @param EventStore $eventStore
      */
     private function __construct($class, EventStore $eventStore)
@@ -53,13 +52,13 @@ final class Repository
     }
 
     /**
-     * @param EventSourcedEntity $class
+     * @param EventSourcedEntity $eventSourcedEntity
      * @throws IncorrectEntityException
      */
-    public function save(EventSourcedEntity $class)
+    public function save(EventSourcedEntity $eventSourcedEntity)
     {
-        $this->enforceTypeConstraint($class);
-        $this->eventStore->store($class->identifier(), $class->stagedEvents());
+        $this->enforceTypeConstraint(get_class($eventSourcedEntity));
+        $this->eventStore->store($eventSourcedEntity->identifier(), $eventSourcedEntity->stagedEvents());
     }
 
     /**
@@ -68,8 +67,8 @@ final class Repository
      */
     private function enforceTypeConstraint($class)
     {
-        if (get_class($class) !== get_class($this->entityClass)) {
-            throw new IncorrectEntityException(get_class($class) . " is not the same as " . get_class($this->entityClass));
+        if ($class !== $this->entityClass) {
+            throw new IncorrectEntityClassException();
         }
     }
 }
