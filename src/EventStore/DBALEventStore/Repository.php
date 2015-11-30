@@ -11,7 +11,7 @@ use Rawkode\Eidetic\EventStore\EventStore;
  */
 final class Repository
 {
-    /** @var EventSourcedEntity $entityClass */
+    /** @var $entityClass */
     private $entityClass;
 
     /** @var EventStore $eventStore */
@@ -21,7 +21,7 @@ final class Repository
      * @param EventSourcedEntity $class
      * @param EventStore $eventStore
      */
-    private function __construct(EventSourcedEntity $class, EventStore $eventStore)
+    private function __construct($class, EventStore $eventStore)
     {
         $this->entityClass = $class;
         $this->eventStore = $eventStore;
@@ -34,21 +34,22 @@ final class Repository
      */
     public static function createForType($class, EventStore $eventStore)
     {
-        $entity = $class::getClass();
-        return new self($entity, $eventStore);
+        return new self($class, $eventStore);
     }
 
     /**
-     * @param $identifier
+     * @param $key
      * @return mixed
      */
-    public function load($identifier)
+    public function load($key)
     {
-        $entity = $this->entityClass;
-        $this->enforceTypeConstraint($entity);
-        $events = $this->eventStore->retrieve($identifier);
+        $class = $this->eventStore->getClassForKey($key);
 
-        return $entity::initialise($events);
+        $this->enforceTypeConstraint($class);
+
+        $events = $this->eventStore->retrieve($key);
+
+        return $class::initialise($events);
     }
 
     /**
@@ -62,13 +63,13 @@ final class Repository
     }
 
     /**
-     * @param EventSourcedEntity $entity
+     * @param string $class
      * @throws IncorrectEntityException
      */
-    private function enforceTypeConstraint(EventSourcedEntity $entity)
+    private function enforceTypeConstraint($class)
     {
-        if (get_class($entity) !== get_class($this->entityClass)) {
-            throw new IncorrectEntityException(get_class($entity) . " is not the same as " . get_class($this->entityClass));
+        if (get_class($class) !== get_class($this->entityClass)) {
+            throw new IncorrectEntityException(get_class($class) . " is not the same as " . get_class($this->entityClass));
         }
     }
 }

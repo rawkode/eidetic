@@ -98,12 +98,4 @@ trait EventSourcedEntityMixin
 
         return $applyMethod;
     }
-
-    /**
-     * @return EventSourcedEntityMixin
-     */
-    public static function getClass()
-    {
-        return new self;
-    }
 }

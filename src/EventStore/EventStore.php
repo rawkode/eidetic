@@ -35,4 +35,10 @@ interface EventStore
      * @param  object $event
      */
     public function publish($eventHook, $event);
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getClassForKey($key);
 }

@@ -9,6 +9,7 @@ use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
+use Rawkode\Eidetic\EventStore\Subscriber;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 
 final class DBALEventStore implements EventStore
@@ -104,22 +105,11 @@ final class DBALEventStore implements EventStore
      */
     private function eventLogs($key)
     {
-        $queryBuilder = $this->connection->createQueryBuilder();
+        $this->verifyEventExistsForKey($key);
 
-        $queryBuilder->select('*');
-        $queryBuilder->from($this->tableName);
-        $queryBuilder->where('key = :key');
-        $queryBuilder->orderBy('serial_number', 'ASC');
-
-        $queryBuilder->setParameter('key', $key);
-
-        $statement = $queryBuilder->execute();
+        $statement = $this->eventLogQuery($key)->execute();
 
         $results = $statement->fetchAll();
-
-        if (count($results) === 0) {
-            throw new NoEventsFoundForKeyException();
-        }
 
         return array_map(function ($eventLog) {
             if (true === array_key_exists('recorded_at', $eventLog)) {
@@ -216,5 +206,64 @@ final class DBALEventStore implements EventStore
     public function dropTable()
     {
         $this->connection->getSchemaManager()->dropTable($this->tableName);
+    }
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getClassForKey($key)
+    {
+        $log = $this->singleLogForKey($key);
+
+        return $log[0]['event_class'];
+    }
+
+    /**
+     * @param $key
+     * @throws NoEventsFoundForKeyException
+     */
+    private function verifyEventExistsForKey($key)
+    {
+        $results = $this->singleLogForKey($key);
+
+        if (count($results) === 0) {
+            throw new NoEventsFoundForKeyException();
+        }
+    }
+
+    /**
+     * @param $key
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
+    private function eventLogQuery($key)
+    {
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select('*');
+        $queryBuilder->from($this->tableName);
+        $queryBuilder->where('key = :key');
+        $queryBuilder->orderBy('serial_number', 'ASC');
+
+        $queryBuilder->setParameter('key', $key);
+
+        return $queryBuilder;
+    }
+
+    /**
+     * @param $key
+     * @return array
+     */
+    private function singleLogForKey($key)
+    {
+        $queryBuilder = $this->eventLogQuery($key);
+
+        $queryBuilder->setMaxResults(1);
+
+        $statement = $queryBuilder->execute();
+
+        $results = $statement->fetchAll();
+
+        return $results;
     }
 }
