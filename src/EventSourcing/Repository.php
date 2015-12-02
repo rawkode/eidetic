@@ -31,7 +31,7 @@ final class Repository
      * @param EventStore $eventStore
      * @return Repository
      */
-    public static function createForType($class, EventStore $eventStore)
+    public static function createForWrites($class, EventStore $eventStore)
     {
         return new self($class, $eventStore);
     }
@@ -42,13 +42,9 @@ final class Repository
      */
     public function load($key)
     {
-        $class = $this->eventStore->getClassForKey($key);
-
-        $this->enforceTypeConstraint($class);
-
         $events = $this->eventStore->retrieve($key);
 
-        return $class::initialise($events);
+        return call_user_func(array($this->entityClass, 'initialise'), $events);
     }
 
     /**
@@ -57,18 +53,6 @@ final class Repository
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
-        $this->enforceTypeConstraint(get_class($eventSourcedEntity));
         $this->eventStore->store($eventSourcedEntity->identifier(), $eventSourcedEntity->stagedEvents());
-    }
-
-    /**
-     * @param $class
-     * @throws IncorrectEntityClassException
-     */
-    private function enforceTypeConstraint($class)
-    {
-        if ($class !== $this->entityClass) {
-            throw new IncorrectEntityClassException($class . ' is not same as ' . $this->entityClass);
-        }
     }
 }

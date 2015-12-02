@@ -22,7 +22,7 @@ class RepositorySpec extends ObjectBehavior
 
         $this->user = User::createWithUsername("Rawkode");
 
-        $this->beConstructedThrough('createForType', [get_class($this->user), $this->eventStore]);
+        $this->beConstructedThrough('createForWrites', [get_class($this->user), $this->eventStore]);
     }
 
     public function it_can_save_an_event_sourced_entity()
@@ -35,17 +35,8 @@ class RepositorySpec extends ObjectBehavior
         $this->save($this->user);
     }
 
-    public function it_cannot_save_wrong_entity_type()
-    {
-        $this->shouldThrow('Rawkode\Eidetic\EventSourcing\IncorrectEntityClassException')->during('save', [new Test]);
-    }
-
     public function it_can_load_an_entity()
     {
-        $this->eventStore->getClassForKey(
-            $this->user->identifier()
-        )->willReturn('phpspec\Rawkode\Eidetic\EventSourcing\User');
-
         $this->eventStore->retrieve(
             $this->user->identifier()
         )->willReturn([
