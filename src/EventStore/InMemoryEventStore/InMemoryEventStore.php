@@ -150,18 +150,6 @@ final class InMemoryEventStore implements EventStore
         array_push($this->stagedEvents, $event);
     }
 
-
-    /**
-     * @param $key
-     * @return string
-     */
-    public function getClassForKey($key)
-    {
-        $this->verifyEventExistsForKey($key);
-
-        return get_class($this->events[$key][0]['event']);
-    }
-
     /**
      * @param $key
      * @throws NoEventsFoundForKeyException
