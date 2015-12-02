@@ -53,7 +53,7 @@ final class Repository
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
-     * @throws IncorrectEntityException
+     * @throws IncorrectEntityClassException
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
@@ -62,13 +62,13 @@ final class Repository
     }
 
     /**
-     * @param string $class
-     * @throws IncorrectEntityException
+     * @param $class
+     * @throws IncorrectEntityClassException
      */
     private function enforceTypeConstraint($class)
     {
         if ($class !== $this->entityClass) {
-            throw new IncorrectEntityClassException();
+            throw new IncorrectEntityClassException($class . ' is not same as ' . $this->entityClass);
         }
     }
 }
