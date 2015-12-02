@@ -6,6 +6,7 @@ use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
+use Rawkode\Eidetic\EventStore\Subscriber;
 use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
 use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
 use Rawkode\Eidetic\EventStore\EventPublisher;
@@ -69,16 +70,14 @@ final class InMemoryEventStore implements EventStore
      */
     private function eventLogs($key)
     {
-        if (false === array_key_exists($key, $this->events)) {
-            throw new NoEventsFoundForKeyException();
-        }
+        $this->verifyEventExistsForKey($key);
 
         return $this->events[$key];
     }
 
     /**
      * @param string $key
-     * @param array  $events
+     * @param array $events
      *
      * @throws TransactionAlreadyInProgressException
      * @throws InvalidEventException
@@ -106,7 +105,7 @@ final class InMemoryEventStore implements EventStore
     private function startTransaction()
     {
         $this->transactionBackup = $this->events;
-        $this->stagedEvents = [ ];
+        $this->stagedEvents = [];
     }
 
     /**
@@ -114,7 +113,7 @@ final class InMemoryEventStore implements EventStore
     private function abortTransaction()
     {
         $this->events = $this->transactionBackup;
-        $this->stagedEvents = [ ];
+        $this->stagedEvents = [];
     }
 
     /**
@@ -127,7 +126,7 @@ final class InMemoryEventStore implements EventStore
             $this->publish(self::EVENT_STORED, $event);
         }
 
-        $this->stagedEvents = [ ];
+        $this->stagedEvents = [];
     }
 
     /**
@@ -149,5 +148,28 @@ final class InMemoryEventStore implements EventStore
         ];
 
         array_push($this->stagedEvents, $event);
+    }
+
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getClassForKey($key)
+    {
+        $this->verifyEventExistsForKey($key);
+
+        return get_class($this->events[$key][0]['event']);
+    }
+
+    /**
+     * @param $key
+     * @throws NoEventsFoundForKeyException
+     */
+    private function verifyEventExistsForKey($key)
+    {
+        if (false === array_key_exists($key, $this->events)) {
+            throw new NoEventsFoundForKeyException();
+        }
     }
 }
