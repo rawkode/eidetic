@@ -6,8 +6,8 @@ require_once 'UserRepository.php';
 require_once 'UserCreatedWithUsername.php';
 
 use Example\User;
-use Example\UserRepository;
 use Rawkode\Eidetic\EventStore\DBALEventStore\DBALEventStore;
+use Rawkode\Eidetic\EventStore\DBALEventStore\Repository;
 
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
@@ -42,7 +42,7 @@ $eventStore->registerSubscriber($symfony2EventDispatcherSubscriber);
 $eventStore->createTable();
 
 // Initialise a repository with this event store
-$userRepository = new UserRepository($eventStore);
+$userRepository = Repository::createForType('Example\User', $eventStore);
 
 // Create a user
 $user = User::createWithUsername("David");
