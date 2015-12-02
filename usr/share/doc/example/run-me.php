@@ -2,15 +2,13 @@
 
 require_once '../../../../var/vendor/autoload.php';
 require_once 'User.php';
-require_once 'UserRepository.php';
 require_once 'UserCreatedWithUsername.php';
 
 use Example\User;
-use Rawkode\Eidetic\EventStore\DBALEventStore\DBALEventStore;
-use Rawkode\Eidetic\EventStore\DBALEventStore\Repository;
-
+use Rawkode\Eidetic\EventSourcing\Repository;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
+use Rawkode\Eidetic\EventStore\DBALEventStore\DBALEventStore;
 use Rawkode\Eidetic\EventStore\Symfony2EventDispatcherSubscriber\Symfony2EventDispatcherSubscriber;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -42,7 +40,7 @@ $eventStore->registerSubscriber($symfony2EventDispatcherSubscriber);
 $eventStore->createTable();
 
 // Initialise a repository with this event store
-$userRepository = Repository::createForType('Example\User', $eventStore);
+$userRepository = Repository::createForWrites('Example\User', $eventStore);
 
 // Create a user
 $user = User::createWithUsername("David");
@@ -58,6 +56,8 @@ $userRepository->save($user);
 // Lets backup the identifier so that we can discard and reload
 $userIdentifier = $user->identifier();
 unset($user);
+
+echo "The user object has now been unset. Lets load through our repository!" . PHP_EOL;
 
 // Load the user from the EventStore, using our repository
 $user = $userRepository->load($userIdentifier);

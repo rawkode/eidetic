@@ -133,16 +133,4 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 
         $this->eventStore->store('uuid-1', [ $event ]);
     }
-
-    /**
-     * @test
-     */
-    public function it_can_get_class_from_key()
-    {
-        $this->eventStore->store('uuid-1', $this->validEvents);
-
-        $className = $this->eventStore->getClassForKey('uuid-1');
-
-        $this->assertEquals($className, 'stdClass');
-    }
 }

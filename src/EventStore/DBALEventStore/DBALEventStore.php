@@ -210,17 +210,6 @@ final class DBALEventStore implements EventStore
 
     /**
      * @param $key
-     * @return string
-     */
-    public function getClassForKey($key)
-    {
-        $log = $this->singleLogForKey($key);
-
-        return $log[0]['event_class'];
-    }
-
-    /**
-     * @param $key
      * @throws NoEventsFoundForKeyException
      */
     private function verifyEventExistsForKey($key)
