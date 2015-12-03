@@ -33,6 +33,17 @@ abstract class EventStore implements Serializer
     abstract protected function abortTransaction();
     abstract protected function completeTransaction();
 
+    abstract protected function countEntityEvents($entityIdentifier);
+
+    /**
+     * Returns the class associated with an entity identifier.
+     *
+     * @param string $entityIdentifier
+     *
+     * @return string
+     */
+    abstract protected function entityClass($entityIdentifier);
+
     /** @var array */
     protected $stagedEvents = [];
 
