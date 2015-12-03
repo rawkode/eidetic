@@ -21,7 +21,6 @@ final class InMemoryEventStore extends EventStore
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
-     * @param object             $event
      *
      * @throws InvalidEventException
      */
@@ -31,7 +30,7 @@ final class InMemoryEventStore extends EventStore
             $this->events[$eventSourcedEntity->identifier()] = [];
         }
 
-        array_map(function ($event) use ($eventSourcedEntity) {
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
             $this->events[$eventSourcedEntity->identifier()][] = [
                 'entity_identifier' => $eventSourcedEntity->identifier(),
                 'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
@@ -42,7 +41,7 @@ final class InMemoryEventStore extends EventStore
             ];
 
             array_push($this->stagedEvents, $event);
-        }, $eventSourcedEntity->stagedEvents());
+        }
     }
 
     /**
