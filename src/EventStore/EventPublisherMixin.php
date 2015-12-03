@@ -2,6 +2,8 @@
 
 namespace Rawkode\Eidetic\EventStore;
 
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+
 trait EventPublisherMixin
 {
     /**
@@ -18,14 +20,26 @@ trait EventPublisherMixin
     }
 
     /**
-     * @param int    $eventHook
-     * @param object $event
+     * @param string             $eventHook
+     * @param EventSourcedEntity $eventSourcedEntity
      */
-    public function publish($eventHook, $event)
+    public function publishAll($eventHook, EventSourcedEntity $eventSourcedEntity)
+    {
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
+            $this->publish($eventHook, $eventSourcedEntity, $event);
+        }
+    }
+
+    /**
+     * @param int                $eventHook
+     * @param EventSourcedEntity $eventSourcedEntity
+     * @param object             $event
+     */
+    public function publish($eventHook, EventSourcedEntity $eventSourcedEntity, $event)
     {
         /** @var Subscriber $subscriber */
         foreach ($this->subscribers as $subscriber) {
-            $subscriber->handle($eventHook, $event);
+            $subscriber->handle($eventHook, $eventSourcedEntity, $event);
         }
     }
 }

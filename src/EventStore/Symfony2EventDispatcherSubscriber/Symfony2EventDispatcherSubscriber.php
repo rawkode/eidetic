@@ -3,6 +3,7 @@
 namespace Rawkode\Eidetic\EventStore\Symfony2EventDispatcherSubscriber;
 
 use Rawkode\Eidetic\EventStore\EventSubscriber;
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 final class Symfony2EventDispatcherSubscriber implements EventSubscriber
@@ -20,11 +21,12 @@ final class Symfony2EventDispatcherSubscriber implements EventSubscriber
     }
 
     /**
-     * @param int    $eventHook
-     * @param object $event
+     * @param int                $eventHook
+     * @param EventSourcedEntity $eventSourcedEntity
+     * @param object             $event
      */
-    public function handle($eventHook, $event)
+    public function handle($eventHook, EventSourcedEntity $eventSourcedEntity, $event)
     {
-        $this->eventDispatcher->dispatch($eventHook, new EventDispatcherEvent($event));
+        $this->eventDispatcher->dispatch($eventHook, new EventDispatcherEvent($eventSourcedEntity, $event));
     }
 }

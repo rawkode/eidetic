@@ -11,6 +11,7 @@ abstract class EventStore implements Serializer
     use VerifyEventIsAClassTrait;
 
     // Subscriber hooks
+    const EVENT_PRE_STORE = 'eidetic.eventstore.event_pre_store';
     const EVENT_STORED = 'eidetic.eventstore.event_stored';
 
     // Implement these in your concretion
@@ -31,9 +32,9 @@ abstract class EventStore implements Serializer
      */
     abstract protected function eventLog($entityIdentifier);
 
-    abstract protected function startTransaction();
-    abstract protected function abortTransaction();
-    abstract protected function completeTransaction();
+    abstract protected function startTransaction(EventSourcedEntity $eventSourcedEntity);
+    abstract protected function abortTransaction(EventSourcedEntity $eventSourcedEntity);
+    abstract protected function completeTransaction(EventSourcedEntity $eventSourcedEntity);
 
     abstract protected function countEntityEvents($entityIdentifier);
 
@@ -60,15 +61,17 @@ abstract class EventStore implements Serializer
     public function store(EventSourcedEntity $eventSourcedEntity)
     {
         try {
-            $this->startTransaction();
+            $this->startTransaction($eventSourcedEntity);
+
             $this->enforceEventIntegrity($eventSourcedEntity);
+
             $this->persist($eventSourcedEntity);
         } catch (\Exception $exception) {
-            $this->abortTransaction();
+            $this->abortTransaction($eventSourcedEntity);
             throw $exception;
         }
 
-        $this->completeTransaction();
+        $this->completeTransaction($eventSourcedEntity);
     }
 
     /**

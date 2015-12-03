@@ -64,15 +64,18 @@ final class InMemoryEventStore extends EventStore
 
     /**
      */
-    protected function startTransaction()
+    protected function startTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->transactionBackup = $this->events;
+
+        $this->publishAll(static::EVENT_STORED, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
+
         $this->stagedEvents = [];
     }
 
     /**
      */
-    protected function abortTransaction()
+    protected function abortTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->events = $this->transactionBackup;
         $this->stagedEvents = [];
@@ -80,13 +83,11 @@ final class InMemoryEventStore extends EventStore
 
     /**
      */
-    protected function completeTransaction()
+    protected function completeTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->transactionBackup = [];
 
-        foreach ($this->stagedEvents as $event) {
-            $this->publish(self::EVENT_STORED, $event);
-        }
+        $this->publishAll(static::EVENT_STORED, $eventSourcedEntity, $this->stagedEvents);
 
         $this->stagedEvents = [];
     }
