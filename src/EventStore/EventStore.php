@@ -3,10 +3,12 @@
 namespace Rawkode\Eidetic\EventStore;
 
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+use Rawkode\Eidetic\EventSourcing\VerifyEventIsAClassTrait;
 
 abstract class EventStore implements Serializer
 {
     use EventPublisherMixin;
+    use VerifyEventIsAClassTrait;
 
     // Subscriber hooks
     const EVENT_STORED = 'eidetic.eventstore.event_stored';
@@ -59,6 +61,7 @@ abstract class EventStore implements Serializer
     {
         try {
             $this->startTransaction();
+            $this->enforceEventIntegrity($eventSourcedEntity);
             $this->persist($eventSourcedEntity);
         } catch (\Exception $exception) {
             $this->abortTransaction();
@@ -66,6 +69,18 @@ abstract class EventStore implements Serializer
         }
 
         $this->completeTransaction();
+    }
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity [description]
+     *
+     * @throws InvalidEventException
+     */
+    private function enforceEventIntegrity(EventSourcedEntity $eventSourcedEntity)
+    {
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
+            $this->verifyEventIsAClass($event);
+        }
     }
 
     /**
