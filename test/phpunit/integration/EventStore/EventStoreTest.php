@@ -35,9 +35,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function it_throws_an_exception_when_loading_an_invalid_key()
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException');
@@ -45,9 +43,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $this->eventStore->retrieve('this-identifier-will-not-exist');
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function it_can_save_and_load_events_by_their_key()
     {
         $this->eventStore->store($this->user);
@@ -55,9 +51,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->validEvents, $this->eventStore->retrieve($this->user->identifier()));
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function it_saves_the_correct_event_log_meta_data()
     {
         $now = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -73,9 +67,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(UserCreatedWithUsername::class, $eventLog[0]['event_class']);
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function it_can_publish_events_to_subscribers()
     {
         // Create Mock
@@ -92,9 +84,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $this->eventStore->store($this->user);
     }
 
-    /**
-     * @test
-     */
+    /** @test */
     public function it_loads_events_in_the_correct_order()
     {
         $this->user->drinkBeer();
@@ -107,5 +97,15 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         foreach ($eventLog as $eventLogEntry) {
             $this->assertEquals(++$counter, $eventLogEntry['serial_number']);
         }
+    }
+
+    /** @test */
+    public function it_can_count_the_number_of_events_for_an_entity()
+    {
+        $this->assertEquals(0, $this->eventStore->countEntityEvents($this->user->identifier()));
+
+        $this->eventStore->store($this->user);
+
+        $this->assertEquals(1, $this->eventStore->countEntityEvents($this->user->identifier()));
     }
 }

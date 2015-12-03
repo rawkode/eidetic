@@ -95,24 +95,14 @@ final class InMemoryEventStore extends EventStore
      * @param string $entityIdentifier
      *
      * @throws NoEventsFoundForKeyException
-     */
-    protected function verifyEventExistsForKey($entityIdentifier)
-    {
-        if (false === array_key_exists($entityIdentifier, $this->events)) {
-            throw new NoEventsFoundForKeyException();
-        }
-    }
-
-    /**
-     * @param string $entityIdentifier
-     *
-     * @throws NoEventsFoundForKeyException
      *
      * @return int
      */
-    protected function countEntityEvents($entityIdentifier)
+    public function countEntityEvents($entityIdentifier)
     {
-        $this->verifyEventExistsForKey($entityIdentifier);
+        if (false === array_key_exists($entityIdentifier, $this->events)) {
+            return 0;
+        }
 
         return count($this->events[$entityIdentifier]);
     }

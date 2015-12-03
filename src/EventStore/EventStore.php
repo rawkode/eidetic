@@ -97,6 +97,18 @@ abstract class EventStore implements Serializer
     }
 
     /**
+     * @param string $entityIdentifier
+     *
+     * @throws NoEventsFoundForKeyException
+     */
+    protected function verifyEventExistsForKey($entityIdentifier)
+    {
+        if (0 === $this->countEntityEvents($entityIdentifier)) {
+            throw new NoEventsFoundForKeyException();
+        }
+    }
+
+    /**
      * @return array
      */
     protected function stagedEvents()
