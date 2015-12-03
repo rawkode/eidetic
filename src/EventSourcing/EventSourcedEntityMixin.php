@@ -4,6 +4,8 @@ namespace Rawkode\Eidetic\EventSourcing;
 
 trait EventSourcedEntityMixin
 {
+    use VerifyEventIsAClassTrait;
+
     /**
      * @var string
      */
@@ -40,7 +42,7 @@ trait EventSourcedEntityMixin
      */
     public static function initialise(array $eventStream)
     {
-        $entity = new self;
+        $entity = new static();
 
         foreach ($eventStream as $event) {
             $entity->applyEvent($event);
@@ -69,9 +71,13 @@ trait EventSourcedEntityMixin
 
     /**
      * @param object $event
+     *
+     * @throws InvalidEventException
      */
     private function applyEvent($event)
     {
+        $this->verifyEventIsAClass($event);
+
         $applyMethod = $this->findEventHandler($event);
 
         array_push($this->stagedEvents, $event);

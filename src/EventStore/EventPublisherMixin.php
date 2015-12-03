@@ -7,7 +7,7 @@ trait EventPublisherMixin
     /**
      * @var array
      */
-    private $subscribers = [ ];
+    protected $subscribers = [];
 
     /**
      * @param Subscriber $subscriber
@@ -18,8 +18,8 @@ trait EventPublisherMixin
     }
 
     /**
-     * @param  int $eventHook
-     * @param  object $event
+     * @param int    $eventHook
+     * @param object $event
      */
     public function publish($eventHook, $event)
     {

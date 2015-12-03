@@ -1,8 +1,6 @@
 <?php
 
 require_once '../../../../var/vendor/autoload.php';
-require_once 'User.php';
-require_once 'UserCreatedWithUsername.php';
 
 use Example\User;
 use Rawkode\Eidetic\EventSourcing\Repository;
@@ -20,7 +18,7 @@ $symfony2EventDispatcher->addListener(EventStore::EVENT_STORED, 'thisIsMyListene
 // Event Dispatcher Listener ... ish
 function thisIsMyListener(Event $event)
 {
-    echo "Hello, I am the Symfony2 Event Dispatcher Listener!" . PHP_EOL;
+    echo 'Hello, I am the Symfony2 Event Dispatcher Listener!'.PHP_EOL;
     var_dump($event->event());
 }
 
@@ -30,7 +28,7 @@ $symfony2EventDispatcherSubscriber = new symfony2EventDispatcherSubscriber($symf
 // We need an EventStore. We'll use the DBAL with in-memory sqlite
 $eventStore = DBALEventStore::createWithOptions('events', [
     'driver' => 'pdo_sqlite',
-    'memory' => true
+    'memory' => true,
 ]);
 
 // Register :D
@@ -43,34 +41,32 @@ $eventStore->createTable();
 $userRepository = Repository::createForWrites('Example\User', $eventStore);
 
 // Create a user
-$user = User::createWithUsername("David");
+$user = User::createWithUsername('David');
 
 // We can output the users username and there's no sign of an event
 //  event anywhere! Nifty
-echo "Hello, {$user->username()}!" . PHP_EOL;
+echo "Hello, {$user->username()}!".PHP_EOL;
 
 // We can even save this user, still no mention of an event
 $userRepository->save($user);
-
 
 // Lets backup the identifier so that we can discard and reload
 $userIdentifier = $user->identifier();
 unset($user);
 
-echo "The user object has now been unset. Lets load through our repository!" . PHP_EOL;
+echo 'The user object has now been unset. Lets load through our repository!'.PHP_EOL;
 
 // Load the user from the EventStore, using our repository
 $user = $userRepository->load($userIdentifier);
 
 // Viola!
-echo "Hello, {$user->username()}!" . PHP_EOL;
+echo "Hello, {$user->username()}!".PHP_EOL;
 var_dump($user);
-
 
 // What about identifiers that don't exist?
 try {
     $userRepository->load('random');
 } catch (NoEventsFoundForKeyException $noEventsFoundForKeyException) {
-    echo "Sorry, can't find any events for this entity." . PHP_EOL;
-    echo "You should probably put me in your repository and throw a more domain specific exception" . PHP_EOL;
+    echo "Sorry, can't find any events for this entity.".PHP_EOL;
+    echo 'You should probably put me in your repository and throw a more domain specific exception'.PHP_EOL;
 }

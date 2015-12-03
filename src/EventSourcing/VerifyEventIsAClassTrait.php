@@ -1,8 +1,6 @@
 <?php
 
-namespace Rawkode\Eidetic\EventStore;
-
-use Rawkode\Eidetic\EventStore\InvalidEventException;
+namespace Rawkode\Eidetic\EventSourcing;
 
 trait VerifyEventIsAClassTrait
 {
@@ -11,7 +9,7 @@ trait VerifyEventIsAClassTrait
      *
      * @throws InvalidArgumentException
      */
-    private function verifyEventIsAClass($event)
+    protected function verifyEventIsAClass($event)
     {
         try {
             $class = get_class($event);
