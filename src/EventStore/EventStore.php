@@ -109,14 +109,6 @@ abstract class EventStore implements Serializer
     }
 
     /**
-     * @return array
-     */
-    protected function stagedEvents()
-    {
-        return $this->stagedEvents;
-    }
-
-    /**
      * @param object $object
      *
      * @return string

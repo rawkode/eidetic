@@ -98,7 +98,7 @@ final class InMemoryEventStore extends EventStore
      *
      * @return int
      */
-    public function countEntityEvents($entityIdentifier)
+    protected function countEntityEvents($entityIdentifier)
     {
         if (false === array_key_exists($entityIdentifier, $this->events)) {
             return 0;
