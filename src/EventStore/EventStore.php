@@ -44,7 +44,7 @@ abstract class EventStore implements Serializer
      *
      * @return string
      */
-    abstract protected function entityClass($entityIdentifier);
+    abstract public function entityClass($entityIdentifier);
 
     /** @var array */
     protected $stagedEvents = [];
