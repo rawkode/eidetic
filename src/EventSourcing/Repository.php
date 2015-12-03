@@ -2,12 +2,13 @@
 
 namespace Rawkode\Eidetic\EventSourcing;
 
+use Rawkode\Eidetic\CQRS\WriteModelRepository;
 use Rawkode\Eidetic\EventStore\EventStore;
 
 /**
  * Class Repository.
  */
-final class Repository
+final class Repository implements WriteModelRepository
 {
     /** @var $entityClass */
     private $entityClass;
@@ -51,7 +52,7 @@ final class Repository
     /**
      * @param EventSourcedEntity $eventSourcedEntity
      *
-     * @throws IncorrectEntityClassException
+     * @throws \Exception
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
