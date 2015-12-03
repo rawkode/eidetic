@@ -2,37 +2,122 @@
 
 namespace Rawkode\Eidetic\EventStore;
 
-interface EventStore
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+
+abstract class EventStore implements Serializer
 {
+    use EventPublisherMixin;
+
     // Subscriber hooks
-    const EVENT_STORED = "eidetic.eventstore.event_stored";
+    const EVENT_STORED = 'eidetic.eventstore.event_stored';
+
+    // Implement these in your concretion
 
     /**
-     * @param string $key
-     * @param array  $events
+     * @param EventSourcedEntity $eventSourcedEntity
+     *
+     * @throws InvalidEventException
      */
-    public function store($key, array $events);
+    abstract protected function persist(EventSourcedEntity $eventSourcedEntity);
 
     /**
-     * @param string $key
+     * Return all event log entries for $entityIdentifier.
+     *
+     * @param string $entityIdentifier
      *
      * @return array
      */
-    public function retrieve($key);
+    abstract protected function eventLog($entityIdentifier);
+
+    abstract protected function startTransaction();
+    abstract protected function abortTransaction();
+    abstract protected function completeTransaction();
+
+    /** @var array */
+    protected $stagedEvents = [];
+
+    /** @var Serializer */
+    protected $serializer;
 
     /**
-     * @param string $key
+     * Store an EventSourcedEntity's staged events.
+     *
+     * @param EventSourcedEntity $eventSourcedEntity
      */
-    public function retrieveLogs($key);
+    public function store(EventSourcedEntity $eventSourcedEntity)
+    {
+        try {
+            $this->startTransaction();
+            $this->persist($eventSourcedEntity);
+        } catch (\Exception $exception) {
+            $this->abortTransaction();
+            throw $exception;
+        }
+
+        $this->completeTransaction();
+    }
 
     /**
-     * @param  Subscriber $subscriber
+     * Returns all events for $entityIdentifier.
+     *
+     * @param string $entityIdentifier
+     *
+     * @return array
      */
-    public function registerSubscriber($subscriber);
+    public function retrieve($entityIdentifier)
+    {
+        $eventLog = $this->eventLog($entityIdentifier);
+
+        return array_map(function ($eventLogEntry) {
+            return $eventLogEntry['event'];
+        }, $eventLog);
+    }
 
     /**
-     * @param  int $eventHook
-     * @param  object $event
+     * Returns all the log entries for $entityIdentifier.
+     *
+     * @param string $entityIdentifier
+     *
+     * @return array
      */
-    public function publish($eventHook, $event);
+    public function retrieveLog($entityIdentifier)
+    {
+        return $this->eventLog($entityIdentifier);
+    }
+
+    /**
+     * @return array
+     */
+    protected function stagedEvents()
+    {
+        return $this->stagedEvents;
+    }
+
+    /**
+     * @param object $object
+     *
+     * @return string
+     */
+    public function serialize($object)
+    {
+        if (false === is_null($this->serializer)) {
+            return $this->serializer->serialize($object);
+        }
+
+        return base64_encode(serialize($object));
+    }
+
+    /**
+     * @param string $serializedObject
+     *
+     * @return object
+     */
+    public function unserialize($serializedObject)
+    {
+        if (false === is_null($this->serializer)) {
+            return $this->serializer->serialize($serializedObject);
+        }
+
+        return unserialize(base64_decode($serializedObject));
+    }
 }

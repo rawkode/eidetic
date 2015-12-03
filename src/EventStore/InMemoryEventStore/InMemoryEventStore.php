@@ -4,24 +4,11 @@ namespace Rawkode\Eidetic\EventStore\InMemoryEventStore;
 
 use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
-use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventStore\Subscriber;
-use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
-use Rawkode\Eidetic\EventStore\InMemoryEventStore\TransactionAlreadyInProgressException;
-use Rawkode\Eidetic\EventStore\EventPublisher;
-use Doctrine\Common\EventSubscriber;
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 
-final class InMemoryEventStore implements EventStore
+final class InMemoryEventStore extends EventStore
 {
-    use EventPublisherMixin;
-    use VerifyEventIsAClassTrait;
-
-    /**
-     * @var int
-     */
-    private $serialNumber = 0;
-
     /**
      * @var array
      */
@@ -33,76 +20,51 @@ final class InMemoryEventStore implements EventStore
     private $transactionBackup = [];
 
     /**
-     * @var array
-     */
-    private $stagedEvents = [];
-
-    /**
-     * @param string $key
+     * @param EventSourcedEntity $eventSourcedEntity
      *
-     * @return array
+     * @throws InvalidEventException
      */
-    public function retrieve($key)
+    protected function persist(EventSourcedEntity $eventSourcedEntity)
     {
-        $eventLogs = $this->eventLogs($key);
+        if (false === array_key_exists($eventSourcedEntity->identifier(), $this->events)) {
+            $this->events[$eventSourcedEntity->identifier()] = [];
+        }
 
-        return array_map(function ($eventLog) {
-            return $eventLog['event'];
-        }, $eventLogs);
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
+            $this->events[$eventSourcedEntity->identifier()][] = [
+                'entity_identifier' => $eventSourcedEntity->identifier(),
+                'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
+                'entity_class' => get_class($eventSourcedEntity),
+                'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
+                'event_class' => get_class($event),
+                'event' => $this->serialize($event),
+            ];
+
+            array_push($this->stagedEvents, $event);
+        }
     }
 
     /**
-     * @param string $key
-     *
-     * @return array
-     */
-    public function retrieveLogs($key)
-    {
-        return $this->eventLogs($key);
-    }
-
-    /**
-     * @param string $key
+     * @param string $entityIdentifier
      *
      * @throws NoEventsFoundForKeyException
      *
      * @return array
      */
-    private function eventLogs($key)
+    protected function eventLog($entityIdentifier)
     {
-        $this->verifyEventExistsForKey($key);
+        $this->verifyEventExistsForKey($entityIdentifier);
 
-        return $this->events[$key];
+        return array_map(function ($eventLogEntry) {
+            $eventLogEntry['event'] = $this->unserialize($eventLogEntry['event']);
+
+            return $eventLogEntry;
+        }, $this->events[$entityIdentifier]);
     }
 
     /**
-     * @param string $key
-     * @param array $events
-     *
-     * @throws TransactionAlreadyInProgressException
-     * @throws InvalidEventException
      */
-    public function store($key, array $events)
-    {
-        try {
-            $this->startTransaction();
-
-            foreach ($events as $event) {
-                $this->persistEvent($key, $event);
-            }
-        } catch (InvalidEventException $invalidEventException) {
-            $this->abortTransaction();
-
-            throw $invalidEventException;
-        }
-
-        $this->completeTransaction();
-    }
-
-    /**
-     * @throws TransactionAlreadyInProgressException
-     */
-    private function startTransaction()
+    protected function startTransaction()
     {
         $this->transactionBackup = $this->events;
         $this->stagedEvents = [];
@@ -110,7 +72,7 @@ final class InMemoryEventStore implements EventStore
 
     /**
      */
-    private function abortTransaction()
+    protected function abortTransaction()
     {
         $this->events = $this->transactionBackup;
         $this->stagedEvents = [];
@@ -118,7 +80,7 @@ final class InMemoryEventStore implements EventStore
 
     /**
      */
-    private function completeTransaction()
+    protected function completeTransaction()
     {
         $this->transactionBackup = [];
 
@@ -130,33 +92,13 @@ final class InMemoryEventStore implements EventStore
     }
 
     /**
-     * @param string $key
-     * @param  $event
+     * @param string $entityIdentifier
      *
-     * @throws InvalidEventException
-     */
-    private function persistEvent($key, $event)
-    {
-        $this->verifyEventIsAClass($event);
-
-        $this->events[$key][] = [
-            'serial_number' => ++$this->serialNumber,
-            'key' => $key,
-            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
-            'event_class' => get_class($event),
-            'event' => $event,
-        ];
-
-        array_push($this->stagedEvents, $event);
-    }
-
-    /**
-     * @param $key
      * @throws NoEventsFoundForKeyException
      */
-    private function verifyEventExistsForKey($key)
+    protected function verifyEventExistsForKey($entityIdentifier)
     {
-        if (false === array_key_exists($key, $this->events)) {
+        if (false === array_key_exists($entityIdentifier, $this->events)) {
             throw new NoEventsFoundForKeyException();
         }
     }

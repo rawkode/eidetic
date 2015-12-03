@@ -21,10 +21,7 @@
   },
   "autoload-dev": {
       "psr-4": {
-          "Rawkode\\Eidetic\\Tests\\Unit\\": "test//phpunit//unit//"
-      },
-      "psr-4": {
-          "Rawkode\\Eidetic\\Tests\\Integration\\": "test//phpunit//integration//"
+          "Example\\": "usr//share//doc//example//"
       }
   },
   "config": {

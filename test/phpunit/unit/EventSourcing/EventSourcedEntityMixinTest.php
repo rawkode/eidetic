@@ -1,4 +1,5 @@
 <?php
+
 namespace Rawkode\Eidetic\Tests\Unit\EventSourcing;
 
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntityMixin;
@@ -17,9 +18,9 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($eventHandlerMethodName, 'applyTestEvent');
     }
 
-    /**
-     * @test
-     */
+     /**
+      * @test
+      */
      public function it_can_apply_an_event()
      {
          $this->assertCount(0, $this->stagedEvents());
@@ -40,6 +41,17 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
          $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEvent', $stagedEvents[0]);
          $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEventTwo', $stagedEvents[1]);
          $this->assertInstanceOf('Rawkode\Eidetic\Tests\Unit\EventSourcing\TestEvent', $stagedEvents[2]);
+     }
+
+    /**
+     * @test
+     */
+    public function it_throws_an_error_for_invalid_events()
+    {
+        $this->assertCount(0, $this->stagedEvents());
+        $this->setExpectedException('Rawkode\Eidetic\EventSourcing\InvalidEventException');
+
+        $this->applyEvent('Hello');
     }
 
     /**
@@ -67,7 +79,7 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
     {
         $entity = $this::initialise([
             new TestEvent(),
-            new TestEventTwo()
+            new TestEventTwo(),
         ]);
 
         $this->assertEquals(2, $entity->version());
@@ -76,12 +88,10 @@ class EventSourcedEntityMixinTest extends \PHPUnit_Framework_TestCase
 
     private function applyTestEvent()
     {
-
     }
 
     private function applyTestEventTwo()
     {
-
     }
 }
 

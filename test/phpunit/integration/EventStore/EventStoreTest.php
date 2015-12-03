@@ -1,36 +1,36 @@
 <?php
 
-namespace Rawkode\Eidetic\Tests\Integration\EventStore;
+namespace Rawkode\Eidetic\Tests;
+
+use Example\User;
+use Example\UserCreatedWithUsername;
 use Rawkode\Eidetic\EventStore\EventStore;
 
 abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var EventStore
-     */
+    /** @var EventStore */
     protected $eventStore;
 
-    /**
-     * @var array
-     */
+    /** @var User */
+    protected $user;
+
+    /** @var array */
     protected $validEvents;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $invalidEvents;
 
+    /**
+     */
     public function setUp()
     {
+        $this->user = User::createWithUsername('Rawkode');
+
         $this->validEvents = [
-            new \stdClass(),
-            new \stdClass(),
-            new \stdClass(),
+            new UserCreatedWithUsername('Rawkode'),
         ];
 
         $this->invalidEvents = [
-            new \stdClass(),
-            0,
             new \stdClass(),
         ];
     }
@@ -42,7 +42,7 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException');
 
-        $this->eventStore->retrieve('uuid-1');
+        $this->eventStore->retrieve('this-identifier-will-not-exist');
     }
 
     /**
@@ -50,9 +50,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_can_save_and_load_events_by_their_key()
     {
-        $this->eventStore->store('uuid-1', $this->validEvents);
+        $this->eventStore->store($this->user);
 
-        $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
+        $this->assertEquals($this->validEvents, $this->eventStore->retrieve($this->user->identifier()));
     }
 
     /**
@@ -62,55 +62,15 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $now = new \DateTime('now', new \DateTimeZone('UTC'));
 
-        $this->eventStore->store('uuid-1', $this->validEvents);
+        $this->eventStore->store($this->user);
 
-        $eventLogs = $this->eventStore->retrieveLogs('uuid-1');
+        $eventLog = $this->eventStore->retrieveLog($this->user->identifier());
 
         // Ensure that the time inserted into the event store is within a minute of UTC now
-        $this->assertEquals('0', $now->diff($eventLogs[0]['recorded_at'])->format('%i'));
+        $this->assertEquals('0', $now->diff($eventLog[0]['recorded_at'])->format('%i'));
 
         // Ensure event_class is saved correctly
-        $this->assertEquals('stdClass', $eventLogs[0]['event_class']);
-    }
-
-    /**
-     *
-     */
-    public function it_loads_events_in_the_correct_order()
-    {
-        $this->eventStore->store('uuid-1', $this->validEvents);
-
-        $eventLogs = $this->eventStore->retrieve('uuid-1');
-
-        $counter = 0;
-
-        array_map(function ($eventLog) {
-            $this->assertEquals(++$counter, $eventLog['serial_number']);
-        }, $eventLogs);
-    }
-
-    /**
-     * @test
-     */
-    public function it_does_not_allow_events_that_are_not_objects()
-    {
-        $this->setExpectedException('Rawkode\Eidetic\EventStore\InvalidEventException');
-
-        $this->eventStore->store('uuid-1', $this->invalidEvents);
-    }
-
-    /**
-     * @test
-     */
-    public function it_can_rollback_a_transaction_after_an_error()
-    {
-        $this->eventStore->store('uuid-1', $this->validEvents);
-
-        $this->setExpectedException('Rawkode\Eidetic\EventStore\InvalidEventException');
-
-        $this->eventStore->store('uuid-1', $this->invalidEvents);
-
-        $this->assertEquals($this->validEvents, $this->eventStore->retrieve('uuid-1'));
+        $this->assertEquals(UserCreatedWithUsername::class, $eventLog[0]['event_class']);
     }
 
     /**
@@ -118,8 +78,6 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function it_can_publish_events_to_subscribers()
     {
-        $event = new \stdClass;
-
         // Create Mock
         $subscriber = $this->getMockBuilder('Rawkode\Eidetic\EventStore\EventSubscriber')
             ->setMethods(array('handle'))
@@ -127,10 +85,27 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
 
         $subscriber->expects($this->once())
             ->method('handle')
-            ->with(EventStore::EVENT_STORED, $event);
+            ->with(EventStore::EVENT_STORED, $this->validEvents[0]);
 
         $this->eventStore->registerSubscriber($subscriber);
 
-        $this->eventStore->store('uuid-1', [ $event ]);
+        $this->eventStore->store($this->user);
+    }
+
+    /**
+     * @test
+     */
+    public function it_loads_events_in_the_correct_order()
+    {
+        $this->user->drinkBeer();
+        $this->eventStore->store($this->user);
+
+        $eventLog = $this->eventStore->retrieveLog($this->user->identifier());
+
+        $counter = 0;
+
+        foreach ($eventLog as $eventLogEntry) {
+            $this->assertEquals(++$counter, $eventLogEntry['serial_number']);
+        }
     }
 }

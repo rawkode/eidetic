@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="var/vendor/autoload.php"
+<phpunit bootstrap="./var/vendor/autoload.php"
          backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
@@ -8,9 +8,9 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false">
+         stopOnFailure="true">
     <testsuites>
-        <testsuite name="Rawkode\eidetic Test Suite">
+        <testsuite name="Rawkode\Eidetic Test Suite">
             <directory>test/phpunit</directory>
         </testsuite>
     </testsuites>
