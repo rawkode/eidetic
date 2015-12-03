@@ -35,6 +35,24 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
+    /**
+     * Call protected/private method of a class.
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @return mixed Method return.
+     */
+    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
+    }
+
     /** @test */
     public function it_throws_an_exception_when_loading_an_invalid_key()
     {
@@ -102,10 +120,24 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function it_can_count_the_number_of_events_for_an_entity()
     {
-        $this->assertEquals(0, $this->eventStore->countEntityEvents($this->user->identifier()));
+        $this->assertEquals(0, $this->invokeMethod($this->eventStore, 'countEntityEvents', array($this->user->identifier())));
 
         $this->eventStore->store($this->user);
 
-        $this->assertEquals(1, $this->eventStore->countEntityEvents($this->user->identifier()));
+        $this->assertEquals(1, $this->invokeMethod($this->eventStore, 'countEntityEvents', array($this->user->identifier())));
+    }
+
+    /** @test */
+    public function it_throws_exception_when_event_key_does_not_exist()
+    {
+        $this->setExpectedException('Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException');
+        $out = $this->invokeMethod($this->eventStore, 'entityClass', array($this->user->identifier()));
+    }
+
+    /** @test */
+    public function it_can_find_entity_class()
+    {
+        $this->eventStore->store($this->user);
+        $this->assertEquals('Example\User', $this->invokeMethod($this->eventStore, 'entityClass', array($this->user->identifier())));
     }
 }
