@@ -168,7 +168,7 @@ final class DBALEventStore extends EventStore
      *
      * @return int
      */
-    protected function countEntityEvents($entityIdentifier)
+    public function countEntityEvents($entityIdentifier)
     {
         /* @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->connection->createQueryBuilder();
