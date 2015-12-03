@@ -44,6 +44,8 @@ final class Repository implements WriteModelRepository
      */
     public function load($entityIdentifier)
     {
+        $this->enforceTypeConstraint($this->eventStore->entityClass($entityIdentifier));
+
         $events = $this->eventStore->retrieve($entityIdentifier);
 
         return call_user_func(array($this->entityClass, 'initialise'), $events);
@@ -56,6 +58,20 @@ final class Repository implements WriteModelRepository
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
+        $this->enforceTypeConstraint(get_class($eventSourcedEntity));
+
         $this->eventStore->store($eventSourcedEntity);
+    }
+
+    /**
+     * @param string $class
+     *
+     * @throws IncorrectEntityClassException
+     */
+    private function enforceTypeConstraint($class)
+    {
+        if ($this->entityClass !== $class) {
+            throw new IncorrectEntityClassException();
+        }
     }
 }

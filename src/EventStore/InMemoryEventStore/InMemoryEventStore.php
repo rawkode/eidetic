@@ -114,7 +114,7 @@ final class InMemoryEventStore extends EventStore
      *
      * @return string
      */
-    protected function entityClass($entityIdentifier)
+    public function entityClass($entityIdentifier)
     {
         $this->verifyEventExistsForKey($entityIdentifier);
 
