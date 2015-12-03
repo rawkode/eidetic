@@ -49,7 +49,7 @@ abstract class EventStore implements Serializer
         try {
             $this->startTransaction();
             $this->persist($eventSourcedEntity);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->abortTransaction();
             throw $exception;
         }
