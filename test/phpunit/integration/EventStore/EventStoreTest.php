@@ -36,11 +36,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Call protected/private method of a class.
-     *
-     * @param object &$object    Instantiated object that we will run method on.
-     * @param string $methodName Method name to call
-     * @param array  $parameters Array of parameters to pass into method.
+     * @param object &$object
+     * @param string $methodName
+     * @param array  $parameters
      *
      * @return mixed Method return.
      */
@@ -51,6 +49,18 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * @param object &$object
+     * @param string $propertyName
+     */
+    public function modifyProperty(&$object, $propertyName, $newValue)
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $property = $reflection->getProperty($propertyName);
+        $property->setAccessible(true);
+        $property->setValue($object, $newValue);
     }
 
     /** @test */
@@ -139,5 +149,24 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventStore->store($this->user);
         $this->assertEquals('Example\User', $this->invokeMethod($this->eventStore, 'entityClass', array($this->user->identifier())));
+    }
+
+    /** @test */
+    public function it_can_abort_transactions()
+    {
+        // We need one event inside the EventStore
+        $this->eventStore->store($this->user);
+
+        // Use reflection to break our model and force an abortTransaction
+        $this->modifyProperty($this->user, 'stagedEvents', array_merge($this->user->stagedEvents(), ['Hello']));
+
+        try {
+            $this->eventStore->store($this->user);
+        } catch (\Exception $exception) {
+            // We're not testing the exception is thrown, but that the state is unchanged
+        }
+
+        // Ensure there's still only one event
+        $this->assertEquals(1, $this->invokeMethod($this->eventStore, 'countEntityEvents', array($this->user->identifier())));
     }
 }
