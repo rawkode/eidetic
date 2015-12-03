@@ -4,6 +4,7 @@ namespace Rawkode\Eidetic\EventStore\DBALEventStore;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Rawkode\Eidetic\EventStore\EventStore;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
@@ -133,7 +134,7 @@ final class DBALEventStore extends EventStore
         $schema = $schemaManager->createSchema();
 
         if ($schema->hasTable($this->tableName)) {
-            return;
+            throw new TableAlreadyExistsException();
         }
 
         $table = $schema->createTable($this->tableName);
@@ -167,8 +168,9 @@ final class DBALEventStore extends EventStore
      *
      * @return int
      */
-    private function countEntityEvents($entityIdentifier)
+    protected function countEntityEvents($entityIdentifier)
     {
+        /* @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('COUNT(entity_identifier)');
@@ -187,6 +189,7 @@ final class DBALEventStore extends EventStore
      */
     protected function eventLogQuery($entityIdentifier)
     {
+        /* @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('*');
@@ -202,18 +205,25 @@ final class DBALEventStore extends EventStore
     /**
      * @param string $entityIdentifier
      *
-     * @return array
+     * @throws NoEventsFoundForKeyException
+     *
+     * @return string
      */
-    protected function singleLogForKey($entityIdentifier)
+    protected function entityClass($entityIdentifier)
     {
-        $queryBuilder = $this->eventLogQuery($entityIdentifier);
+        $this->verifyEventExistsForKey($entityIdentifier);
 
+        /* @var QueryBuilder $queryBuilder */
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select('entity_class');
+        $queryBuilder->from($this->tableName);
+        $queryBuilder->where('entity_identifier = :entity_identifier');
+        $queryBuilder->orderBy('serial_number', 'ASC');
         $queryBuilder->setMaxResults(1);
 
-        $statement = $queryBuilder->execute();
+        $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
 
-        $results = $statement->fetchAll();
-
-        return $results;
+        return $queryBuilder->execute()->fetchColumn(0);
     }
 }

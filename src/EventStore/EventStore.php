@@ -3,10 +3,12 @@
 namespace Rawkode\Eidetic\EventStore;
 
 use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+use Rawkode\Eidetic\EventSourcing\VerifyEventIsAClassTrait;
 
 abstract class EventStore implements Serializer
 {
     use EventPublisherMixin;
+    use VerifyEventIsAClassTrait;
 
     // Subscriber hooks
     const EVENT_STORED = 'eidetic.eventstore.event_stored';
@@ -33,6 +35,17 @@ abstract class EventStore implements Serializer
     abstract protected function abortTransaction();
     abstract protected function completeTransaction();
 
+    abstract protected function countEntityEvents($entityIdentifier);
+
+    /**
+     * Returns the class associated with an entity identifier.
+     *
+     * @param string $entityIdentifier
+     *
+     * @return string
+     */
+    abstract protected function entityClass($entityIdentifier);
+
     /** @var array */
     protected $stagedEvents = [];
 
@@ -48,6 +61,7 @@ abstract class EventStore implements Serializer
     {
         try {
             $this->startTransaction();
+            $this->enforceEventIntegrity($eventSourcedEntity);
             $this->persist($eventSourcedEntity);
         } catch (\Exception $exception) {
             $this->abortTransaction();
@@ -55,6 +69,18 @@ abstract class EventStore implements Serializer
         }
 
         $this->completeTransaction();
+    }
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity [description]
+     *
+     * @throws InvalidEventException
+     */
+    private function enforceEventIntegrity(EventSourcedEntity $eventSourcedEntity)
+    {
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
+            $this->verifyEventIsAClass($event);
+        }
     }
 
     /**
@@ -86,11 +112,15 @@ abstract class EventStore implements Serializer
     }
 
     /**
-     * @return array
+     * @param string $entityIdentifier
+     *
+     * @throws NoEventsFoundForKeyException
      */
-    protected function stagedEvents()
+    protected function verifyEventExistsForKey($entityIdentifier)
     {
-        return $this->stagedEvents;
+        if (0 === $this->countEntityEvents($entityIdentifier)) {
+            throw new NoEventsFoundForKeyException();
+        }
     }
 
     /**
