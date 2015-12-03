@@ -2,8 +2,21 @@
 
 namespace Rawkode\Eidetic\CQRS;
 
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
+
 interface WriteModelRepository
 {
-    public function save($object);
+    /**
+     * @param string $identifier
+     *
+     * @return array
+     */
     public function load($identifier);
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     *
+     * @throws \Exception
+     */
+    public function save(EventSourcedEntity $eventSourcedEntity);
 }

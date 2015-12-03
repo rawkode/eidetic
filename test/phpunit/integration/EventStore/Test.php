@@ -21,6 +21,16 @@ final class Test extends EventStoreTest
     }
 
     /**
+     * @test
+     */
+    public function it_will_not_create_table_if_it_exists()
+    {
+        $this->setExpectedException('Rawkode\Eidetic\EventStore\DBALEventStore\TableAlreadyExistsException');
+
+        $this->eventStore->createTable();
+    }
+
+    /**
      */
     public function tearDown()
     {
