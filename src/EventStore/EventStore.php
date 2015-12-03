@@ -15,7 +15,6 @@ abstract class EventStore implements Serializer
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
-     * @param object             $event
      *
      * @throws InvalidEventException
      */
@@ -35,7 +34,7 @@ abstract class EventStore implements Serializer
     abstract protected function completeTransaction();
 
     /** @var array */
-    private $stagedEvents = [];
+    protected $stagedEvents = [];
 
     /** @var Serializer */
     protected $serializer;
@@ -43,10 +42,7 @@ abstract class EventStore implements Serializer
     /**
      * Store an EventSourcedEntity's staged events.
      *
-     * @param string $key
-     * @param array  $events
-     *
-     * @throws InvalidEventException
+     * @param EventSourcedEntity $eventSourcedEntity
      */
     public function store(EventSourcedEntity $eventSourcedEntity)
     {
@@ -64,7 +60,7 @@ abstract class EventStore implements Serializer
     /**
      * Returns all events for $entityIdentifier.
      *
-     * @param string $key
+     * @param string $entityIdentifier
      *
      * @return array
      */
@@ -80,7 +76,7 @@ abstract class EventStore implements Serializer
     /**
      * Returns all the log entries for $entityIdentifier.
      *
-     * @param string $key
+     * @param string $entityIdentifier
      *
      * @return array
      */

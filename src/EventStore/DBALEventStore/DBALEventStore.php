@@ -50,7 +50,7 @@ final class DBALEventStore extends EventStore
     {
         $eventCount = $this->countEntityEvents($eventSourcedEntity->identifier());
 
-        array_map(function ($event) use ($eventSourcedEntity, &$eventCount) {
+        foreach ($eventSourcedEntity->stagedEvents() as $event) {
             $this->connection->insert($this->tableName, [
                 'entity_identifier' => $eventSourcedEntity->identifier(),
                 'serial_number' => ++$eventCount,
@@ -68,7 +68,7 @@ final class DBALEventStore extends EventStore
             ]);
 
             array_push($this->stagedEvents, $event);
-        }, $eventSourcedEntity->stagedEvents());
+        }
     }
 
     /**
