@@ -4,19 +4,12 @@ namespace Rawkode\Eidetic\EventStore\DBALEventStore;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Schema\Table;
-use Rawkode\Eidetic\EventStore\InvalidEventException;
 use Rawkode\Eidetic\EventStore\EventStore;
-use Rawkode\Eidetic\EventStore\EventPublisherMixin;
 use Rawkode\Eidetic\EventStore\NoEventsFoundForKeyException;
-use Rawkode\Eidetic\EventStore\Subscriber;
-use Rawkode\Eidetic\EventStore\VerifyEventIsAClassTrait;
+use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
 
-final class DBALEventStore implements EventStore
+final class DBALEventStore extends EventStore
 {
-    use EventPublisherMixin;
-    use VerifyEventIsAClassTrait;
-
     /**
      * @var string
      */
@@ -26,9 +19,6 @@ final class DBALEventStore implements EventStore
      * @var Connection
      */
     private $connection;
-
-    /** @var array */
-    private $stagedEvents = [ ];
 
     /**
      * @param string     $tableName
@@ -54,122 +44,85 @@ final class DBALEventStore implements EventStore
     }
 
     /**
-     * @param string $key
-     * @param array  $events
+     * @param EventSourcedEntity $eventSourcedEntity
      */
-    public function store($key, array $events)
+    protected function persist(EventSourcedEntity $eventSourcedEntity)
     {
-        try {
-            $this->startTransaction();
+        $eventCount = $this->countEntityEvents($eventSourcedEntity->identifier());
 
-            foreach ($events as $event) {
-                $this->persistEvent($key, $event);
-            }
-        } catch (InvalidEventException $invalidEventException) {
-            $this->abortTransaction();
+        array_map(function ($event) use ($eventSourcedEntity, &$eventCount) {
+            $this->connection->insert($this->tableName, [
+                'entity_identifier' => $eventSourcedEntity->identifier(),
+                'serial_number' => ++$eventCount,
+                'entity_class' => get_class($eventSourcedEntity),
+                'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
+                'event_class' => get_class($event),
+                'event' => $this->serialize($event),
+            ], [
+                \PDO::PARAM_STR,
+                \PDO::PARAM_INT,
+                \PDO::PARAM_STR,
+                'datetime',
+                \PDO::PARAM_STR,
+                \PDO::PARAM_STR,
+            ]);
 
-            throw $invalidEventException;
+            array_push($this->stagedEvents, $event);
+        }, $eventSourcedEntity->stagedEvents());
+    }
+
+    /**
+     * @param string $entityIdentifier
+     *
+     * @throws NoEventsFoundForKeyException
+     *
+     * @return array
+     */
+    protected function eventLog($entityIdentifier)
+    {
+        if (0 === $this->countEntityEvents($entityIdentifier)) {
+            throw new NoEventsFoundForKeyException();
         }
 
-        $this->completeTransaction();
-    }
+        $statement = $this->eventLogQuery($entityIdentifier)->execute();
 
-    /**
-     * @param string $key
-     *
-     * @return array
-     */
-    public function retrieve($key)
-    {
-        $results = $this->eventLogs($key);
+        $eventLog = $statement->fetchAll();
 
-        return array_map(function ($eventLog) {
-            return unserialize(base64_decode($eventLog['event']));
-        }, $results);
-    }
+        return array_map(function ($eventLogEntry) {
+            $eventLogEntry['event'] = $this->unserialize($eventLogEntry['event']);
+            $eventLogEntry['recorded_at'] = new \DateTime($eventLogEntry['recorded_at']);
 
-    /**
-     * @param string $key
-     *
-     * @return array
-     */
-    public function retrieveLogs($key)
-    {
-        return $this->eventLogs($key);
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return array
-     */
-    private function eventLogs($key)
-    {
-        $this->verifyEventExistsForKey($key);
-
-        $statement = $this->eventLogQuery($key)->execute();
-
-        $results = $statement->fetchAll();
-
-        return array_map(function ($eventLog) {
-            if (true === array_key_exists('recorded_at', $eventLog)) {
-                $eventLog['recorded_at'] = new \DateTime($eventLog['recorded_at']);
-            }
-
-            return $eventLog;
-        }, $results);
+            return $eventLogEntry;
+        }, $eventLog);
     }
 
     /**
      */
-    private function startTransaction()
+    protected function startTransaction()
     {
         $this->connection->beginTransaction();
-        $this->stagedEvents = [ ];
+        $this->stagedEvents = [];
     }
 
     /**
      */
-    private function abortTransaction()
+    protected function abortTransaction()
     {
         $this->connection->rollBack();
-        $this->stagedEvents = [ ];
+        $this->stagedEvents = [];
     }
 
     /**
      */
-    private function completeTransaction()
+    protected function completeTransaction()
     {
         $this->connection->commit();
 
-        foreach ($this->stagedEvents as $event) {
+        array_map(function ($event) {
             $this->publish(self::EVENT_STORED, $event);
-        }
+        }, $this->stagedEvents);
 
-        $this->stagedEvents = [ ];
-    }
-
-    /**
-     * @param string $key
-     * @param object $event
-     */
-    private function persistEvent($key, $event)
-    {
-        $this->verifyEventIsAClass($event);
-
-        $this->connection->insert($this->tableName, [
-            'key' => $key,
-            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
-            'event_class' => get_class($event),
-            'event' => base64_encode(serialize($event)),
-        ], [
-            \PDO::PARAM_STR,
-            'datetime',
-            \PDO::PARAM_STR,
-            \PDO::PARAM_STR,
-        ]);
-
-        array_push($this->stagedEvents, $event);
+        $this->stagedEvents = [];
     }
 
     /**
@@ -185,16 +138,17 @@ final class DBALEventStore implements EventStore
 
         $table = $schema->createTable($this->tableName);
 
-        $serialNumberColumn = $table->addColumn('serial_number', 'integer');
-        $serialNumberColumn->setAutoincrement(true);
-        $table->setPrimaryKey(['serial_number']);
+        $table->addColumn('entity_identifier', 'string', ['length' => 255]);
+        $table->addColumn('serial_number', 'integer');
 
-        $table->addColumn('key', 'string', ['length' => 255]);
+        $table->setPrimaryKey(['entity_identifier', 'serial_number']);
+
+        $table->addColumn('entity_class', 'string', ['length' => 255]);
         $table->addColumn('recorded_at', 'datetime');
         $table->addColumn('event_class', 'string', ['length' => 255]);
         $table->addColumn('event', 'text');
 
-        $table->addIndex(['key']);
+        $table->addIndex(['entity_class']);
         $table->addIndex(['recorded_at']);
         $table->addIndex(['event_class']);
 
@@ -209,43 +163,50 @@ final class DBALEventStore implements EventStore
     }
 
     /**
-     * @param $key
-     * @throws NoEventsFoundForKeyException
+     * @param string $entityIdentifier
+     *
+     * @return int
      */
-    private function verifyEventExistsForKey($key)
+    private function countEntityEvents($entityIdentifier)
     {
-        $results = $this->singleLogForKey($key);
+        $queryBuilder = $this->connection->createQueryBuilder();
 
-        if (count($results) === 0) {
-            throw new NoEventsFoundForKeyException();
-        }
+        $queryBuilder->select('COUNT(entity_identifier)');
+        $queryBuilder->from($this->tableName);
+        $queryBuilder->where('entity_identifier = :entity_identifier');
+
+        $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
+
+        return (int) $queryBuilder->execute()->fetchColumn(0);
     }
 
     /**
-     * @param $key
+     * @param string $entityIdentifier
+     *
      * @return \Doctrine\DBAL\Query\QueryBuilder
      */
-    private function eventLogQuery($key)
+    protected function eventLogQuery($entityIdentifier)
     {
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('*');
         $queryBuilder->from($this->tableName);
-        $queryBuilder->where('key = :key');
+        $queryBuilder->where('entity_identifier = :entity_identifier');
         $queryBuilder->orderBy('serial_number', 'ASC');
 
-        $queryBuilder->setParameter('key', $key);
+        $queryBuilder->setParameter('entity_identifier', $entityIdentifier);
 
         return $queryBuilder;
     }
 
     /**
-     * @param $key
+     * @param string $entityIdentifier
+     *
      * @return array
      */
-    private function singleLogForKey($key)
+    protected function singleLogForKey($entityIdentifier)
     {
-        $queryBuilder = $this->eventLogQuery($key);
+        $queryBuilder = $this->eventLogQuery($entityIdentifier);
 
         $queryBuilder->setMaxResults(1);
 

@@ -2,10 +2,9 @@
 
 namespace phpspec\Rawkode\Eidetic\EventSourcing;
 
+use Example\User;
+use Example\UserCreatedWithUsername;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
-use Rawkode\Eidetic\EventSourcing\EventSourcedEntity;
-use Rawkode\Eidetic\EventSourcing\EventSourcedEntityMixin;
 use Rawkode\Eidetic\EventStore\EventStore;
 
 class RepositorySpec extends ObjectBehavior
@@ -20,17 +19,14 @@ class RepositorySpec extends ObjectBehavior
     {
         $this->eventStore = $eventStore;
 
-        $this->user = User::createWithUsername("Rawkode");
+        $this->user = User::createWithUsername('Rawkode');
 
         $this->beConstructedThrough('createForWrites', [get_class($this->user), $this->eventStore]);
     }
 
     public function it_can_save_an_event_sourced_entity()
     {
-        $this->eventStore->store(
-            $this->user->identifier(),
-            $this->user->stagedEvents()
-        )->shouldBeCalled();
+        $this->eventStore->store($this->user)->shouldBeCalled();
 
         $this->save($this->user);
     }
@@ -40,55 +36,9 @@ class RepositorySpec extends ObjectBehavior
         $this->eventStore->retrieve(
             $this->user->identifier()
         )->willReturn([
-            new UserCreatedWithUserName('test')
+            new UserCreatedWithUserName('test'),
         ]);
 
-        $this->load($this->user->identifier())->shouldBeAnInstanceOf('phpspec\Rawkode\Eidetic\EventSourcing\User');
+        $this->load($this->user->identifier())->shouldBeAnInstanceOf('Example\User');
     }
-}
-
-class User implements EventSourcedEntity
-{
-    use EventSourcedEntityMixin;
-
-    /**
-     * @param  string $username
-     * @return User
-     */
-    public static function createWithUsername($username)
-    {
-        $user = new self;
-        $user->applyEvent(new UserCreatedWithUsername($username));
-
-        return $user;
-    }
-
-    /**
-     * @param  UserCreatedWithUsername $userCreatedWithUsername
-     */
-    private function applyUserCreatedWithUsername(UserCreatedWithUsername $userCreatedWithUsername)
-    {
-        $this->username = $userCreatedWithUsername->username();
-    }
-}
-
-class UserCreatedWithUserName
-{
-    private $username;
-
-    public function __construct($username)
-    {
-        $this->identifier = uniqid('user-');
-        $this->username = $username;
-    }
-
-    public function username()
-    {
-        return $this->username;
-    }
-}
-
-class Test extends User
-{
-
 }

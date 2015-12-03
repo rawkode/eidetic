@@ -1,9 +1,8 @@
 <?php
 
-namespace Rawkode\Eidetic\Tests\Integration\EventStore\InMemoryEventStore;
+namespace Rawkode\Eidetic\Tests;
 
 use Rawkode\Eidetic\EventStore\InMemoryEventStore\InMemoryEventStore;
-use Rawkode\Eidetic\Tests\Integration\EventStore\EventStoreTest;
 
 final class InMemoryEventStoreTest extends EventStoreTest
 {
