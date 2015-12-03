@@ -12,8 +12,11 @@ final class User implements EventSourcedEntity
     /** @var string */
     private $username;
 
+    /** @var int */
+    private $balance = 10;
+
     /**
-     * Usually best to make this private and force construction through statics
+     * Usually best to make this private and force construction through statics.
      */
     private function __construct()
     {
@@ -21,23 +24,46 @@ final class User implements EventSourcedEntity
     }
 
     /**
-     * @param  string $username
+     * @param string $username
+     *
      * @return User
      */
     public static function createWithUsername($username)
     {
-        $user = new self;
+        $user = new self();
         $user->applyEvent(new UserCreatedWithUsername($username));
 
         return $user;
     }
 
     /**
-     * @param  UserCreatedWithUsername $userCreatedWithUsername
+     * @param UserCreatedWithUsername $userCreatedWithUsername
      */
     private function applyUserCreatedWithUsername(UserCreatedWithUsername $userCreatedWithUsername)
     {
         $this->username = $userCreatedWithUsername->username();
+    }
+
+    /**
+     */
+    public function drinkBeer()
+    {
+        $this->applyEvent(new UserDrankABeer());
+    }
+
+    /**
+     */
+    private function applyUserDrankABeer()
+    {
+        $this->balance -= 1;
+    }
+
+    /**
+     */
+    public function adoptDog()
+    {
+        $adoptDog = 'not implemented yet';
+        $this->applyEvent($adoptDog);
     }
 
     /**

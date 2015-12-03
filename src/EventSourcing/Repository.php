@@ -5,8 +5,7 @@ namespace Rawkode\Eidetic\EventSourcing;
 use Rawkode\Eidetic\EventStore\EventStore;
 
 /**
- * Class Repository
- * @package Rawkode\Eidetic\EventSourcing
+ * Class Repository.
  */
 final class Repository
 {
@@ -17,7 +16,7 @@ final class Repository
     private $eventStore;
 
     /**
-     * @param string $class
+     * @param string     $class
      * @param EventStore $eventStore
      */
     private function __construct($class, EventStore $eventStore)
@@ -29,6 +28,7 @@ final class Repository
     /**
      * @param $class
      * @param EventStore $eventStore
+     *
      * @return Repository
      */
     public static function createForWrites($class, EventStore $eventStore)
@@ -37,22 +37,24 @@ final class Repository
     }
 
     /**
-     * @param $key
+     * @param string $entityIdentifier
+     *
      * @return mixed
      */
-    public function load($key)
+    public function load($entityIdentifier)
     {
-        $events = $this->eventStore->retrieve($key);
+        $events = $this->eventStore->retrieve($entityIdentifier);
 
         return call_user_func(array($this->entityClass, 'initialise'), $events);
     }
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
+     *
      * @throws IncorrectEntityClassException
      */
     public function save(EventSourcedEntity $eventSourcedEntity)
     {
-        $this->eventStore->store($eventSourcedEntity->identifier(), $eventSourcedEntity->stagedEvents());
+        $this->eventStore->store($eventSourcedEntity);
     }
 }

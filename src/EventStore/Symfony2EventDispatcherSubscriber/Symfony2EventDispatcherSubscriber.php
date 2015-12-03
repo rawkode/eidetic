@@ -20,8 +20,8 @@ final class Symfony2EventDispatcherSubscriber implements EventSubscriber
     }
 
     /**
-     * @param  int $eventHook
-     * @param  object $event
+     * @param int    $eventHook
+     * @param object $event
      */
     public function handle($eventHook, $event)
     {
