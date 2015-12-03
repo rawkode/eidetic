@@ -103,9 +103,9 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('handle'))
             ->getMock();
 
-        $subscriber->expects($this->once())
+        $subscriber->expects($this->exactly(2))
             ->method('handle')
-            ->with(EventStore::EVENT_STORED, $this->validEvents[0]);
+            ->with($this->stringContains('EVENT_'), $this->user, $this->user->stagedEvents()[0]);
 
         $this->eventStore->registerSubscriber($subscriber);
 
