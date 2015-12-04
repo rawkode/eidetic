@@ -24,24 +24,22 @@ final class InMemoryEventStore extends EventStore
      *
      * @throws InvalidEventException
      */
-    protected function persist(EventSourcedEntity $eventSourcedEntity)
+    protected function persist(EventSourcedEntity $eventSourcedEntity, $event)
     {
         if (false === array_key_exists($eventSourcedEntity->identifier(), $this->events)) {
             $this->events[$eventSourcedEntity->identifier()] = [];
         }
 
-        foreach ($eventSourcedEntity->stagedEvents() as $event) {
-            $this->events[$eventSourcedEntity->identifier()][] = [
-                'entity_identifier' => $eventSourcedEntity->identifier(),
-                'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
-                'entity_class' => get_class($eventSourcedEntity),
-                'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
-                'event_class' => get_class($event),
-                'event' => $this->serialize($event),
-            ];
+        $this->events[$eventSourcedEntity->identifier()][] = [
+            'entity_identifier' => $eventSourcedEntity->identifier(),
+            'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
+            'entity_class' => get_class($eventSourcedEntity),
+            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
+            'event_class' => get_class($event),
+            'event' => $this->serialize($event),
+        ];
 
-            array_push($this->stagedEvents, $event);
-        }
+        array_push($this->stagedEvents, $event);
     }
 
     /**
@@ -68,8 +66,6 @@ final class InMemoryEventStore extends EventStore
     {
         $this->transactionBackup = $this->events;
 
-        $this->publishAll(static::EVENT_STORED, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
-
         $this->stagedEvents = [];
     }
 
@@ -86,8 +82,6 @@ final class InMemoryEventStore extends EventStore
     protected function completeTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->transactionBackup = [];
-
-        $this->publishAll(static::EVENT_STORED, $eventSourcedEntity, $this->stagedEvents);
 
         $this->stagedEvents = [];
     }
