@@ -37,6 +37,6 @@ class Symfony2EventDispatcherSubscriberSpec extends ObjectBehavior
             ->dispatch(EventStore::EVENT_STORED, $eventDispatcherEvent)
             ->shouldBeCalled();
 
-        $this->handle(EventStore::EVENT_STORED, new \stdClass());
+        $this->handle(EventStore::EVENT_STORED, $this->user, new \stdClass());
     }
 }
