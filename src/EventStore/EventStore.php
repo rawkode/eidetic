@@ -67,9 +67,9 @@ abstract class EventStore implements Serializer
             $this->enforceEventIntegrity($eventSourcedEntity);
 
             foreach ($eventSourcedEntity->stagedEvents() as $event) {
-                $this->publishAll(self::EVENT_PRE_STORE, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
+                $this->publishAll(self::EVENT_PRE_STORE, $eventSourcedEntity);
                 $this->persist($eventSourcedEntity, $event);
-                $this->publishAll(self::EVENT_STORED, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
+                $this->publishAll(self::EVENT_STORED, $eventSourcedEntity);
             }
         } catch (\Exception $exception) {
             $this->abortTransaction($eventSourcedEntity);
