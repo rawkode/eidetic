@@ -11,16 +11,17 @@ abstract class EventStore implements Serializer
     use VerifyEventIsAClassTrait;
 
     // Subscriber hooks
+    const TRANSACTION_STARTED = 'eidetic.eventstore.transaction_started';
+    const TRANSACTION_COMPLETED = 'eidetic.eventstore.transaction_completed';
+    const EVENT_PRE_STORE = 'eidetic.eventstore.event_pre_store';
     const EVENT_STORED = 'eidetic.eventstore.event_stored';
-
-    // Implement these in your concretion
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
      *
      * @throws InvalidEventException
      */
-    abstract protected function persist(EventSourcedEntity $eventSourcedEntity);
+    abstract protected function persist(EventSourcedEntity $eventSourcedEntity, $event);
 
     /**
      * Return all event log entries for $entityIdentifier.
@@ -31,10 +32,26 @@ abstract class EventStore implements Serializer
      */
     abstract protected function eventLog($entityIdentifier);
 
-    abstract protected function startTransaction();
-    abstract protected function abortTransaction();
-    abstract protected function completeTransaction();
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
+    abstract protected function startTransaction(EventSourcedEntity $eventSourcedEntity);
 
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
+    abstract protected function abortTransaction(EventSourcedEntity $eventSourcedEntity);
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
+    abstract protected function completeTransaction(EventSourcedEntity $eventSourcedEntity);
+
+    /**
+     * @param string $entityIdentifier
+     *
+     * @return int
+     */
     abstract protected function countEntityEvents($entityIdentifier);
 
     /**
@@ -60,15 +77,23 @@ abstract class EventStore implements Serializer
     public function store(EventSourcedEntity $eventSourcedEntity)
     {
         try {
-            $this->startTransaction();
+            $this->startTransaction($eventSourcedEntity);
+            $this->publishAll(self::TRANSACTION_STARTED, $eventSourcedEntity);
+
             $this->enforceEventIntegrity($eventSourcedEntity);
-            $this->persist($eventSourcedEntity);
+
+            foreach ($eventSourcedEntity->stagedEvents() as $event) {
+                $this->publishAll(self::EVENT_PRE_STORE, $eventSourcedEntity);
+                $this->persist($eventSourcedEntity, $event);
+                $this->publishAll(self::EVENT_STORED, $eventSourcedEntity);
+            }
         } catch (\Exception $exception) {
-            $this->abortTransaction();
+            $this->abortTransaction($eventSourcedEntity);
             throw $exception;
         }
 
-        $this->completeTransaction();
+        $this->completeTransaction($eventSourcedEntity);
+        $this->publishAll(self::TRANSACTION_COMPLETED, $eventSourcedEntity);
     }
 
     /**
