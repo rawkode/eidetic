@@ -11,17 +11,17 @@ abstract class EventStore implements Serializer
     use VerifyEventIsAClassTrait;
 
     // Subscriber hooks
+    const TRANSACTION_STARTED = 'eidetic.eventstore.transaction_started';
+    const TRANSACTION_COMPLETED = 'eidetic.eventstore.transaction_completed';
     const EVENT_PRE_STORE = 'eidetic.eventstore.event_pre_store';
     const EVENT_STORED = 'eidetic.eventstore.event_stored';
-
-    // Implement these in your concretion
 
     /**
      * @param EventSourcedEntity $eventSourcedEntity
      *
      * @throws InvalidEventException
      */
-    abstract protected function persist(EventSourcedEntity $eventSourcedEntity);
+    abstract protected function persist(EventSourcedEntity $eventSourcedEntity, $event);
 
     /**
      * Return all event log entries for $entityIdentifier.
@@ -62,16 +62,22 @@ abstract class EventStore implements Serializer
     {
         try {
             $this->startTransaction($eventSourcedEntity);
+            $this->publishAll(self::TRANSACTION_STARTED, $eventSourcedEntity);
 
             $this->enforceEventIntegrity($eventSourcedEntity);
 
-            $this->persist($eventSourcedEntity);
+            foreach ($eventSourcedEntity->stagedEvents() as $event) {
+                $this->publishAll(self::EVENT_PRE_STORE, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
+                $this->persist($eventSourcedEntity, $event);
+                $this->publishAll(self::EVENT_STORED, $eventSourcedEntity, $eventSourcedEntity->stagedEvents());
+            }
         } catch (\Exception $exception) {
             $this->abortTransaction($eventSourcedEntity);
             throw $exception;
         }
 
         $this->completeTransaction($eventSourcedEntity);
+        $this->publishAll(self::TRANSACTION_COMPLETED, $eventSourcedEntity);
     }
 
     /**

@@ -103,9 +103,14 @@ abstract class EventStoreTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('handle'))
             ->getMock();
 
-        $subscriber->expects($this->exactly(2))
+        // It will be calling 4 times:
+        //  - TRANSACTION_STARTED
+        //  - EVENT_PRE_STORE
+        //  - EVENT_STORED
+        //  - TRANSACTION_COMPLETED
+        $subscriber->expects($this->exactly(4))
             ->method('handle')
-            ->with($this->stringContains('EVENT_'), $this->user, $this->user->stagedEvents()[0]);
+            ->with($this->matchesRegularExpression('/eidetic\.eventstore\./'), $this->user, $this->user->stagedEvents()[0]);
 
         $this->eventStore->registerSubscriber($subscriber);
 
