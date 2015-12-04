@@ -24,24 +24,22 @@ final class InMemoryEventStore extends EventStore
      *
      * @throws InvalidEventException
      */
-    protected function persist(EventSourcedEntity $eventSourcedEntity)
+    protected function persist(EventSourcedEntity $eventSourcedEntity, $event)
     {
         if (false === array_key_exists($eventSourcedEntity->identifier(), $this->events)) {
             $this->events[$eventSourcedEntity->identifier()] = [];
         }
 
-        foreach ($eventSourcedEntity->stagedEvents() as $event) {
-            $this->events[$eventSourcedEntity->identifier()][] = [
-                'entity_identifier' => $eventSourcedEntity->identifier(),
-                'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
-                'entity_class' => get_class($eventSourcedEntity),
-                'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
-                'event_class' => get_class($event),
-                'event' => $this->serialize($event),
-            ];
+        $this->events[$eventSourcedEntity->identifier()][] = [
+            'entity_identifier' => $eventSourcedEntity->identifier(),
+            'serial_number' => count($this->events[$eventSourcedEntity->identifier()]) + 1,
+            'entity_class' => get_class($eventSourcedEntity),
+            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
+            'event_class' => get_class($event),
+            'event' => $this->serialize($event),
+        ];
 
-            array_push($this->stagedEvents, $event);
-        }
+        array_push($this->stagedEvents, $event);
     }
 
     /**
@@ -64,15 +62,16 @@ final class InMemoryEventStore extends EventStore
 
     /**
      */
-    protected function startTransaction()
+    protected function startTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->transactionBackup = $this->events;
+
         $this->stagedEvents = [];
     }
 
     /**
      */
-    protected function abortTransaction()
+    protected function abortTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->events = $this->transactionBackup;
         $this->stagedEvents = [];
@@ -80,13 +79,9 @@ final class InMemoryEventStore extends EventStore
 
     /**
      */
-    protected function completeTransaction()
+    protected function completeTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->transactionBackup = [];
-
-        foreach ($this->stagedEvents as $event) {
-            $this->publish(self::EVENT_STORED, $event);
-        }
 
         $this->stagedEvents = [];
     }

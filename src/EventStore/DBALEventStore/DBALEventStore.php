@@ -47,29 +47,27 @@ final class DBALEventStore extends EventStore
     /**
      * @param EventSourcedEntity $eventSourcedEntity
      */
-    protected function persist(EventSourcedEntity $eventSourcedEntity)
+    protected function persist(EventSourcedEntity $eventSourcedEntity, $event)
     {
         $eventCount = $this->countEntityEvents($eventSourcedEntity->identifier());
 
-        foreach ($eventSourcedEntity->stagedEvents() as $event) {
-            $this->connection->insert($this->tableName, [
-                'entity_identifier' => $eventSourcedEntity->identifier(),
-                'serial_number' => ++$eventCount,
-                'entity_class' => get_class($eventSourcedEntity),
-                'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
-                'event_class' => get_class($event),
-                'event' => $this->serialize($event),
-            ], [
-                \PDO::PARAM_STR,
-                \PDO::PARAM_INT,
-                \PDO::PARAM_STR,
-                'datetime',
-                \PDO::PARAM_STR,
-                \PDO::PARAM_STR,
-            ]);
+        $this->connection->insert($this->tableName, [
+            'entity_identifier' => $eventSourcedEntity->identifier(),
+            'serial_number' => ++$eventCount,
+            'entity_class' => get_class($eventSourcedEntity),
+            'recorded_at' => new \DateTime('now', new \DateTimeZone('UTC')),
+            'event_class' => get_class($event),
+            'event' => $this->serialize($event),
+        ], [
+            \PDO::PARAM_STR,
+            \PDO::PARAM_INT,
+            \PDO::PARAM_STR,
+            'datetime',
+            \PDO::PARAM_STR,
+            \PDO::PARAM_STR,
+        ]);
 
-            array_push($this->stagedEvents, $event);
-        }
+        array_push($this->stagedEvents, $event);
     }
 
     /**
@@ -99,15 +97,16 @@ final class DBALEventStore extends EventStore
 
     /**
      */
-    protected function startTransaction()
+    protected function startTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->connection->beginTransaction();
+
         $this->stagedEvents = [];
     }
 
     /**
      */
-    protected function abortTransaction()
+    protected function abortTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->connection->rollBack();
         $this->stagedEvents = [];
@@ -115,13 +114,9 @@ final class DBALEventStore extends EventStore
 
     /**
      */
-    protected function completeTransaction()
+    protected function completeTransaction(EventSourcedEntity $eventSourcedEntity)
     {
         $this->connection->commit();
-
-        array_map(function ($event) {
-            $this->publish(self::EVENT_STORED, $event);
-        }, $this->stagedEvents);
 
         $this->stagedEvents = [];
     }
