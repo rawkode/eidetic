@@ -32,10 +32,26 @@ abstract class EventStore implements Serializer
      */
     abstract protected function eventLog($entityIdentifier);
 
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
     abstract protected function startTransaction(EventSourcedEntity $eventSourcedEntity);
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
     abstract protected function abortTransaction(EventSourcedEntity $eventSourcedEntity);
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     */
     abstract protected function completeTransaction(EventSourcedEntity $eventSourcedEntity);
 
+    /**
+     * @param string $entityIdentifier
+     *
+     * @return int
+     */
     abstract protected function countEntityEvents($entityIdentifier);
 
     /**
