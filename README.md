@@ -1,13 +1,11 @@
 # Eidetic
 
 [![Software License](https://img.shields.io/github/license/rawkode/eidetic.svg?style=flat-square)](LICENSE)
-[![Build Status](https://img.shields.io/travis/rawkode/eidetic/master.svg?style=flat-square)](https://travis-ci.org/rawkode/eidetic)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/rawkode/eidetic.svg?style=flat-square)](https://scrutinizer-ci.com/g/rawkode/eidetic)
-[![Quality Score](https://img.shields.io/scrutinizer/g/rawkode/eidetic.svg?style=flat-square)](https://scrutinizer-ci.com/g/rawkode/eidetic)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0/small.png)](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0)
-
 [![Latest Version](https://img.shields.io/packagist/v/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
-[![Total Downloads](https://img.shields.io/packagist/dt/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
+[![Build Status](https://img.shields.io/travis/rawkode/eidetic/master.svg?style=flat-square)](https://travis-ci.org/rawkode/eidetic)
+[![Quality Score](https://img.shields.io/scrutinizer/g/rawkode/eidetic.svg?style=flat-square)](https://scrutinizer-ci.com/g/rawkode/eidetic)
+
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0/small.png)](https://insight.sensiolabs.com/projects/16900797-b872-44bf-8a20-b5e13080e9f0)
 
 ---
 Eidetic is a CQRS and EventSourcing library for php >= 5.5
@@ -34,7 +32,6 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
   - Read model repositories
     - Elasticsearch **(Pending)**
     - PDO PostgreSQL: jsonb :) **(Pending)**
-    - DynamoDb **(Pending)**
   - Write model repositories
     - Event Store
 
@@ -62,9 +59,29 @@ Sorry! As this is extremely experimental at the moment, please use ```dev-master
 
 ## Tests
 
+### Testing with local version of php
 ~~~
 bin/phpunit
 bin/phpspec run --format=pretty
+~~~
+
+### Testing with Docker
+~~~
+docker-compose up testing-php-5.5
+docker-compose up testing-php-5.6
+docker-compose up testing-php-7.0
+~~~
+
+### Extra Testing?
+~~~
+docker-compose up testing-database-mysql
+docker-compose up testing-database-postgres
+~~~
+
+If you're having problems with these tests, it's because we can't tell Docker Compose that we need the database servers up and running before running our test application and you might be subject to the race condition. Until Docker Compose has a solution for this, simply boot the database first:
+~~~
+docker-compose up -d mysql
+docker-compose up -d postgres
 ~~~
 
 ## Contributing

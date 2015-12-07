@@ -1,0 +1,59 @@
+testing-php-5.5:
+    image: php:5.5
+    working_dir: /opt/eidetic
+    entrypoint: /opt/eidetic/bin/run-tests.sh
+    environment:
+        - DATABASE_DRIVER=pdo_sqlite
+    volumes:
+        - ./:/opt/eidetic
+
+testing-php-5.6:
+    extends:
+        service: testing-php-5.5
+    image: php:5.6
+
+testing-php-7.0:
+    extends:
+        service: testing-php-5.5
+    image: php:7.0
+
+testing-database-pdo:
+    extends:
+        service: testing-php-5.5
+    environment:
+        - DATABASE_USER=root
+        - DATABASE_PASS=testing
+        - DATABASE_NAME=testing
+
+testing-database-mysql:
+    extends:
+        service: testing-database-pdo
+    links:
+        - mysql:mysql
+    environment:
+        - DATABASE_DRIVER=pdo_mysql
+        - DATABASE_HOST=mysql
+        - DATABASE_PORT=3306
+
+testing-database-postgres:
+    extends:
+        service: testing-database-pdo
+    links:
+        - postgres:postgres
+    environment:
+        - DATABASE_DRIVER=pdo_pgsql
+        - DATABASE_HOST=postgres
+        - DATABASE_PORT=5432
+        - DATABASE_USER=postgres
+        - DATABASE_NAME=postgres
+
+mysql:
+    image: mysql:5
+    environment:
+        - MYSQL_ROOT_PASSWORD=testing
+        - MYSQL_DATABASE=testing
+
+postgres:
+    image: postgres:9
+    environment:
+        - POSTGRES_PASSWORD=testing
