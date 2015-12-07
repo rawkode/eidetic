@@ -4,6 +4,7 @@ namespace Rawkode\Eidetic\EventSourcing;
 
 use Rawkode\Eidetic\CQRS\WriteModelRepository;
 use Rawkode\Eidetic\EventStore\EventStore;
+use Rawkode\Eidetic\EventStore\VersionMismatchException;
 
 /**
  * Class Repository.
@@ -60,6 +61,8 @@ final class Repository implements WriteModelRepository
     {
         $this->enforceTypeConstraint(get_class($eventSourcedEntity));
 
+        $this->enforceVersionMismatchConstraint($eventSourcedEntity);
+
         $this->eventStore->store($eventSourcedEntity);
     }
 
@@ -72,6 +75,22 @@ final class Repository implements WriteModelRepository
     {
         if ($this->entityClass !== $class) {
             throw new IncorrectEntityClassException();
+        }
+    }
+
+    /**
+     * @param EventSourcedEntity $eventSourcedEntity
+     *
+     * @throws VersionMismatchException
+     */
+    private function enforceVersionMismatchConstraint(EventSourcedEntity $eventSourcedEntity)
+    {
+        /** @var EventSourcedEntity $databaseVersion */
+        $databaseVersion = $this->load($eventSourcedEntity->identifier());
+
+        if ($databaseVersion->version() !== $eventSourcedEntity->version()) {
+            throw new VersionMismatchException('Local entity is at version '
+                .$eventSourcedEntity->version().' and database is at '.$databaseVersion->version());
         }
     }
 }
