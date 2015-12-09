@@ -1,3 +1,5 @@
+## 0.1.5
+ * Supporting Symfony3
 ## 0.1.4
  * Repositories now verify that the EventSourcedEntity that is to be saved
     is the same version that is available in the event store.
