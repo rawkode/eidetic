@@ -35,13 +35,24 @@ final class DBALEventStore extends EventStore
      * @param string $tableName
      * @param array  $options
      *
-     * @return self
+     * @return static
      */
     public static function createWithOptions($tableName, array $options)
     {
         $connection = DriverManager::getConnection($options);
 
-        return new self($tableName, $connection);
+        return new static($tableName, $connection);
+    }
+
+    /**
+     * @param string $tableName
+     * @param Connection $connection
+     *
+     * @return static
+     */
+    public static function createWithConnection($tableName, Connection $connection)
+    {
+        return new static($tableName, $connection);
     }
 
     /**
