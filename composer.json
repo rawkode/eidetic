@@ -31,7 +31,7 @@
   "require": {
     "php": ">=5.5",
     "doctrine/dbal": "^2.5",
-    "symfony/event-dispatcher": "^2.7"
+    "symfony/event-dispatcher": "^2.7|^3.0"
   },
   "require-dev": {
     "phpspec/phpspec": "^2.1",
