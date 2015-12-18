@@ -1,6 +1,6 @@
 {
   "name": "rawkode/eidetic",
-  "description": "CQRS and EventSourcing package for php >= 5.4",
+  "description": "CQRS and EventSourcing package for php >= 5.5",
   "license": "MIT",
   "type": "library",
   "authors": [
@@ -30,12 +30,12 @@
   },
   "require": {
     "php": ">=5.5",
-    "doctrine/dbal": "~2.5",
-    "symfony/event-dispatcher": "~2.6|~3.0"
+    "doctrine/dbal": "^2.5",
+    "symfony/event-dispatcher": "^2.6|^3.0"
   },
   "require-dev": {
-    "phpspec/phpspec": "~2.1",
-    "phpunit/phpunit": "~4.3",
-    "fabpot/php-cs-fixer": "~1.10"
+    "phpspec/phpspec": "^2.1",
+    "phpunit/phpunit": "^4.3",
+    "fabpot/php-cs-fixer": "^1.10"
   }
 }
