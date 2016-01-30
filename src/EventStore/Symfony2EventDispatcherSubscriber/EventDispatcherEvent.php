@@ -14,7 +14,7 @@ final class EventDispatcherEvent extends Event
     private $event;
 
     /**
-     * @param obkect $event
+     * @param object $event
      */
     public function __construct(EventSourcedEntity $eventSourcedEntity, $event)
     {
