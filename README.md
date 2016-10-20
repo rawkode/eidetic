@@ -1,5 +1,7 @@
 # Eidetic
 
+**Warning: Unlikely to be updated anytime soon due to time restraints**
+
 [![Software License](https://img.shields.io/github/license/rawkode/eidetic.svg?style=flat-square)](LICENSE)
 [![Latest Version](https://img.shields.io/packagist/v/rawkode/eidetic.svg?style=flat-square)](https://packagist.org/packages/rawkode/eidetic)
 [![Build Status](https://img.shields.io/travis/rawkode/eidetic/master.svg?style=flat-square)](https://travis-ci.org/rawkode/eidetic)
@@ -11,7 +13,7 @@
 Eidetic is a CQRS and EventSourcing library for php >= 5.5
 
 #### Extremely Alpha
-**Please do not use this library for anything important - it's API is likely to change over the coming weeks**
+**Please do not use this library for anything important - it's purely for fun**
 
 ## Why not Broadway?
 Yes - I've seen Broadway and it's a fantastic package, but it wasn't for me.
@@ -26,12 +28,9 @@ Yes - I've seen Broadway and it's a fantastic package, but it wasn't for me.
 This package should allow people to dip their toe in the waters and allow them to consider if using reactive / event based systems will work for them; even if that's simply setting up an EventStore to provide a basic audit trail for a legacy application. Take it slow, get your feet wet - then dive right in! :)
 
 ## Status
-Eidetic is currently under initial development, aiming for 1.0 in December, 2015. The aim is to provide helpers that allow you to implement CQRS and EventSourcing in your application.
+Eidetic is currently under initial development. The aim is to provide helpers that allow you to implement CQRS and EventSourcing in your application.
 
 - CQRS
-  - Read model repositories
-    - Elasticsearch **(Pending)**
-    - PDO PostgreSQL: jsonb :) **(Pending)**
   - Write model repositories
     - Event Store
 
@@ -39,13 +38,8 @@ Eidetic is currently under initial development, aiming for 1.0 in December, 2015
 - Event Stores
   - InMemory
   - Doctrine DBAL
-  - PDO **(Pending)**
-  - DynamoDb **(Pending)**
-  - Mongo **(Pending)**
-
 
 - Event Subscribers
-  - Amazon Kinesis **(Pending)**
   - Symfony2 Event Dispatcher
 
 
